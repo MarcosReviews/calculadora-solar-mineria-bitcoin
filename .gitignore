@@ -1,0 +1,22 @@
+node_modules/
+package-lock.json
+
+# Archivos privados / de otros proyectos
+*.xlsx
+*.xlsm
+*.txt
+*.mjs
+*.json
+*.png
+*.jpg
+*.jpeg
+
+# Versiones antiguas (se guardan en /versions/)
+calculadora-solar-mineria.html
+calculadora-solar-mineria-v2.html
+calculadora-solar-mineria-v3.html
+calculadora-solar-mineria-v4.html
+calculadora-solar-mineria-v5.html
+calculadora-solar-mineria-v6.html
+calculadora-solar-mineria-v7.html
+calculadora-solar-mineria-v8.html

@@ -1,0 +1,729 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+<meta charset="UTF-8">
+<title>Guión — Calculadora Solar para Minería Bitcoin</title>
+<style>
+  /* ── FUENTES Y BASE ── */
+  @import url('https://fonts.googleapis.com/css2?family=Inter:wght@300;400;600;700;800&display=swap');
+
+  :root {
+    --orange: #f7931a;
+    --green:  #16a34a;
+    --blue:   #1d4ed8;
+    --gray:   #6b7280;
+    --light:  #f9fafb;
+    --border: #e5e7eb;
+    --text:   #111827;
+    --text2:  #374151;
+  }
+
+  * { box-sizing: border-box; margin: 0; padding: 0; }
+
+  body {
+    font-family: 'Inter', 'Segoe UI', sans-serif;
+    font-size: 11pt;
+    line-height: 1.65;
+    color: var(--text);
+    background: white;
+    padding: 0;
+  }
+
+  /* ── PORTADA ── */
+  .cover {
+    min-height: 100vh;
+    display: flex;
+    flex-direction: column;
+    justify-content: center;
+    align-items: center;
+    background: linear-gradient(160deg, #0f172a 0%, #1e293b 60%, #0f172a 100%);
+    color: white;
+    text-align: center;
+    padding: 60px 40px;
+    page-break-after: always;
+  }
+  .cover-logo {
+    width: 90px; height: 90px;
+    background: var(--orange);
+    border-radius: 50%;
+    display: flex; align-items: center; justify-content: center;
+    font-size: 44px; font-weight: 900; color: white;
+    margin: 0 auto 32px;
+    box-shadow: 0 0 60px rgba(247,147,26,0.5);
+  }
+  .cover h1 {
+    font-size: 26pt; font-weight: 800; line-height: 1.2;
+    margin-bottom: 14px;
+  }
+  .cover h1 span { color: var(--orange); }
+  .cover .subtitle {
+    font-size: 14pt; color: #94a3b8; margin-bottom: 36px;
+    font-weight: 300;
+  }
+  .cover-meta {
+    display: flex; gap: 32px; justify-content: center; flex-wrap: wrap;
+    border-top: 1px solid rgba(255,255,255,0.1);
+    padding-top: 28px; margin-top: 8px;
+  }
+  .cover-meta-item { text-align: center; }
+  .cover-meta-item .val { font-size: 15pt; font-weight: 800; color: var(--orange); }
+  .cover-meta-item .lbl { font-size: 8.5pt; color: #64748b; text-transform: uppercase; letter-spacing: 0.08em; margin-top: 2px; }
+  .cover-badge {
+    display: inline-block;
+    background: rgba(247,147,26,0.15);
+    border: 1px solid rgba(247,147,26,0.4);
+    color: var(--orange);
+    border-radius: 20px;
+    padding: 5px 18px;
+    font-size: 9pt;
+    font-weight: 700;
+    letter-spacing: 0.06em;
+    text-transform: uppercase;
+    margin-bottom: 22px;
+  }
+
+  /* ── PÁGINA INTERIOR ── */
+  .page {
+    max-width: 720px;
+    margin: 0 auto;
+    padding: 52px 48px;
+  }
+
+  /* ── ÍNDICE ── */
+  .toc-page { page-break-after: always; }
+  .toc-title { font-size: 18pt; font-weight: 800; margin-bottom: 28px; padding-bottom: 12px; border-bottom: 3px solid var(--orange); }
+  .toc-item {
+    display: flex; justify-content: space-between; align-items: center;
+    padding: 9px 0;
+    border-bottom: 1px dotted var(--border);
+    font-size: 10.5pt;
+  }
+  .toc-item:last-child { border-bottom: none; }
+  .toc-item .toc-num { font-weight: 700; color: var(--orange); margin-right: 12px; min-width: 22px; }
+  .toc-item .toc-name { flex: 1; color: var(--text2); }
+  .toc-item .toc-time { font-size: 9pt; color: var(--gray); font-weight: 600; }
+  .toc-total {
+    margin-top: 20px; padding: 14px 18px;
+    background: var(--light); border-radius: 10px;
+    border-left: 4px solid var(--orange);
+    font-size: 10.5pt;
+  }
+  .toc-total strong { color: var(--orange); }
+
+  /* ── SECCIÓN ── */
+  .section {
+    page-break-before: always;
+  }
+  .section:first-of-type { page-break-before: auto; }
+
+  .section-header {
+    display: flex; align-items: flex-start; gap: 16px;
+    margin-bottom: 24px; padding-bottom: 16px;
+    border-bottom: 2px solid var(--orange);
+  }
+  .section-num {
+    background: var(--orange); color: white;
+    font-size: 14pt; font-weight: 800;
+    width: 44px; height: 44px; min-width: 44px;
+    border-radius: 10px;
+    display: flex; align-items: center; justify-content: center;
+    margin-top: 2px;
+  }
+  .section-header-text h2 {
+    font-size: 16pt; font-weight: 800; color: var(--text);
+    margin-bottom: 4px;
+  }
+  .section-header-text .meta {
+    font-size: 9pt; color: var(--gray); font-weight: 600;
+  }
+  .section-header-text .meta span { color: var(--orange); }
+
+  /* ── BLOQUES DE GUIÓN ── */
+  .block { margin-bottom: 20px; }
+
+  .block-label {
+    font-size: 7.5pt; font-weight: 800; text-transform: uppercase;
+    letter-spacing: 0.1em; margin-bottom: 5px;
+    display: flex; align-items: center; gap: 7px;
+  }
+  .block-label::after {
+    content: ''; flex: 1; height: 1px; background: var(--border);
+  }
+
+  .block-label.cam  { color: #dc2626; }
+  .block-label.voz  { color: #1d4ed8; }
+  .block-label.pan  { color: #7c3aed; }
+  .block-label.note { color: #059669; }
+  .block-label.tip  { color: var(--orange); }
+
+  .script-text {
+    background: #fffbf5;
+    border-left: 3px solid var(--orange);
+    border-radius: 0 8px 8px 0;
+    padding: 12px 16px;
+    font-size: 11pt;
+    line-height: 1.7;
+    color: var(--text2);
+  }
+  .script-text strong { color: var(--text); }
+  .script-text em { color: var(--orange); font-style: normal; font-weight: 600; }
+
+  .screen-text {
+    background: #f0f9ff;
+    border-left: 3px solid var(--blue);
+    border-radius: 0 8px 8px 0;
+    padding: 12px 16px;
+    font-size: 10.5pt;
+    line-height: 1.6;
+    color: #1e40af;
+  }
+
+  .note-text {
+    background: #f0fdf4;
+    border-left: 3px solid #16a34a;
+    border-radius: 0 8px 8px 0;
+    padding: 10px 16px;
+    font-size: 10pt;
+    color: #166534;
+  }
+
+  .tip-box {
+    background: rgba(247,147,26,0.06);
+    border: 1px solid rgba(247,147,26,0.3);
+    border-radius: 10px;
+    padding: 14px 18px;
+    margin: 18px 0;
+    font-size: 10.5pt;
+    color: var(--text2);
+  }
+  .tip-box .tip-title { font-weight: 700; color: var(--orange); margin-bottom: 5px; font-size: 10pt; }
+
+  /* ── TABLA DE DATOS DE DEMO ── */
+  .demo-table {
+    width: 100%; border-collapse: collapse;
+    margin: 16px 0; font-size: 10pt;
+    border-radius: 10px; overflow: hidden;
+  }
+  .demo-table thead tr { background: #1e293b; color: white; }
+  .demo-table thead th {
+    padding: 9px 14px; text-align: left;
+    font-size: 9pt; font-weight: 700;
+    text-transform: uppercase; letter-spacing: 0.05em;
+  }
+  .demo-table tbody tr:nth-child(even) { background: var(--light); }
+  .demo-table tbody tr:hover { background: rgba(247,147,26,0.05); }
+  .demo-table td {
+    padding: 9px 14px;
+    border-bottom: 1px solid var(--border);
+  }
+  .demo-table td:last-child { font-weight: 700; color: var(--orange); text-align: right; }
+  .demo-table td:first-child { color: var(--gray); font-size: 9.5pt; }
+
+  /* ── TIMELINE VISUAL ── */
+  .timeline {
+    display: flex; gap: 0;
+    margin: 20px 0;
+    border-radius: 10px; overflow: hidden;
+    border: 1px solid var(--border);
+  }
+  .tl-item {
+    flex: 1; padding: 12px 10px; text-align: center;
+    border-right: 1px solid var(--border);
+    font-size: 9pt;
+  }
+  .tl-item:last-child { border-right: none; }
+  .tl-item .tl-time { font-weight: 800; color: var(--orange); font-size: 11pt; }
+  .tl-item .tl-lbl { color: var(--gray); margin-top: 3px; font-size: 8pt; }
+
+  /* ── CTA ── */
+  .cta-box {
+    background: linear-gradient(135deg, #0f172a, #1e293b);
+    color: white;
+    border-radius: 16px;
+    padding: 28px 32px;
+    text-align: center;
+    margin: 24px 0;
+  }
+  .cta-box h3 { font-size: 16pt; font-weight: 800; color: var(--orange); margin-bottom: 10px; }
+  .cta-box p { color: #94a3b8; font-size: 10.5pt; line-height: 1.6; }
+
+  /* ── CHECKLIST ── */
+  .checklist { list-style: none; padding: 0; margin: 14px 0; }
+  .checklist li {
+    padding: 6px 0 6px 26px;
+    position: relative; font-size: 10.5pt;
+    border-bottom: 1px solid var(--border);
+    color: var(--text2);
+  }
+  .checklist li:last-child { border-bottom: none; }
+  .checklist li::before {
+    content: '□';
+    position: absolute; left: 0;
+    color: var(--orange); font-size: 12pt; font-weight: 700;
+  }
+
+  /* ── PRINT ── */
+  @media print {
+    @page {
+      size: A4;
+      margin: 18mm 16mm 18mm 16mm;
+    }
+    body { font-size: 10.5pt; }
+    .cover { min-height: 0; height: 100vh; }
+    .page { padding: 32px 0; max-width: 100%; }
+    .section { page-break-before: always; }
+    .no-break { page-break-inside: avoid; }
+    a { color: inherit; text-decoration: none; }
+    .cover h1 { font-size: 22pt; }
+  }
+</style>
+</head>
+<body>
+
+<!-- ══════════════════════════════════════════
+     PORTADA
+══════════════════════════════════════════ -->
+<div class="cover">
+  <div class="cover-badge">📋 Guión de Vídeo YouTube</div>
+  <div class="cover-logo">₿</div>
+  <h1>Calculadora Solar para<br><span>Minería Bitcoin</span> 24/7</h1>
+  <p class="subtitle">Guión completo para vídeo de presentación<br>con demo en directo y casos prácticos</p>
+  <div class="cover-meta">
+    <div class="cover-meta-item">
+      <div class="val">~18 min</div>
+      <div class="lbl">Duración estimada</div>
+    </div>
+    <div class="cover-meta-item">
+      <div class="val">7</div>
+      <div class="lbl">Secciones</div>
+    </div>
+    <div class="cover-meta-item">
+      <div class="val">100%</div>
+      <div class="lbl">Gratis &amp; Open</div>
+    </div>
+    <div class="cover-meta-item">
+      <div class="val">2025</div>
+      <div class="lbl">Actualizado</div>
+    </div>
+  </div>
+</div>
+
+<!-- ══════════════════════════════════════════
+     ÍNDICE
+══════════════════════════════════════════ -->
+<div class="page toc-page">
+  <div class="toc-title">📑 Índice del vídeo</div>
+
+  <div class="toc-item"><span class="toc-num">1</span><span class="toc-name">Hook y presentación — ¿Vale la pena minar con solar?</span><span class="toc-time">0:00 – 1:30</span></div>
+  <div class="toc-item"><span class="toc-num">2</span><span class="toc-name">Presentación de la herramienta y de dónde viene</span><span class="toc-time">1:30 – 3:00</span></div>
+  <div class="toc-item"><span class="toc-num">3</span><span class="toc-name">Tour completo: inputs, datos necesarios y cómo obtenerlos</span><span class="toc-time">3:00 – 7:00</span></div>
+  <div class="toc-item"><span class="toc-num">4</span><span class="toc-name">Demo en vivo: caso real con Antminer S21 Pro</span><span class="toc-time">7:00 – 11:00</span></div>
+  <div class="toc-item"><span class="toc-num">5</span><span class="toc-name">Análisis de batería: ¿sale a cuenta añadirla?</span><span class="toc-time">11:00 – 14:30</span></div>
+  <div class="toc-item"><span class="toc-num">6</span><span class="toc-name">Modo "Ya tengo solar" — calcular lo que te falta</span><span class="toc-time">14:30 – 16:30</span></div>
+  <div class="toc-item"><span class="toc-num">7</span><span class="toc-name">Cierre, simulación BTC y llamada a la acción</span><span class="toc-time">16:30 – 18:00</span></div>
+
+  <div class="toc-total">
+    ⏱ Duración total estimada: <strong>~18 minutos</strong> · Formato recomendado: <strong>pantalla compartida + cara en esquina</strong> · Nivel: <strong>principiante–intermedio</strong>
+  </div>
+
+  <div class="tip-box" style="margin-top:28px;">
+    <div class="tip-title">📌 Antes de grabar — Lista de preparación</div>
+    <ul class="checklist">
+      <li>Tener abierta la calculadora en el navegador con los datos de demo ya introducidos</li>
+      <li>Tener abierto MiningNow.com en otra pestaña (para mostrar dónde buscar el consumo del ASIC)</li>
+      <li>Tener abierto FootprintHero.com (para mostrar el cálculo de HSP)</li>
+      <li>Preparar una factura eléctrica real o captura con los precios de tarifa</li>
+      <li>Grabar en resolución mínima 1920×1080 para que la tabla se lea bien</li>
+      <li>Zoom del navegador al 90% para que quepa toda la calculadora en pantalla</li>
+    </ul>
+  </div>
+</div>
+
+<!-- ══════════════════════════════════════════
+     SECCIÓN 1 — HOOK
+══════════════════════════════════════════ -->
+<div class="page section">
+  <div class="section-header">
+    <div class="section-num">1</div>
+    <div class="section-header-text">
+      <h2>Hook y presentación</h2>
+      <div class="meta">⏱ <span>0:00 – 1:30</span> &nbsp;|&nbsp; Cámara frontal + gráfico de rentabilidad de fondo</div>
+    </div>
+  </div>
+
+  <div class="block no-break">
+    <div class="block-label cam">🎥 Plano de apertura</div>
+    <div class="screen-text">Cámara frontal, fondo con la calculadora visible. Empezar directamente sin intro larga.</div>
+  </div>
+
+  <div class="block">
+    <div class="block-label voz">🎙 Guión — Hablar directamente a cámara</div>
+    <div class="script-text">
+      "¿Cuántos paneles solares necesitas para alimentar tu minero Bitcoin las 24 horas del día? ¿Cuántas baterías? ¿Cuánto cuesta todo eso? ¿Y en cuánto tiempo lo recuperas?<br><br>
+      Son las preguntas que me llegan en los comentarios cada semana. Y hoy os traigo la respuesta definitiva: <em>una calculadora gratuita que lo calcula todo en tiempo real</em>, con tus datos exactos.<br><br>
+      No hay que instalar nada. No hay que pagar nada. Abres el navegador, introduces tus datos, y en 30 segundos tienes el análisis completo: paneles necesarios, baterías, coste de instalación, rentabilidad mes a mes con la dificultad creciente de la red, análisis de si merece la pena la batería, y simulación de qué pasa si Bitcoin llega al precio que tú quieras.<br><br>
+      Y si ya tienes una instalación solar y quieres saber qué te falta para añadir el minero, también lo calcula. Quedaos porque hoy lo vemos todo."
+    </div>
+  </div>
+
+  <div class="tip-box no-break">
+    <div class="tip-title">💡 Consejo de producción</div>
+    El hook funciona mejor si empiezas mostrando primero el resultado final (la pantalla de la calculadora con datos reales ya introducidos) y luego vuelves a los inputs. El espectador ve el "premio" antes de la explicación y se queda.
+  </div>
+</div>
+
+<!-- ══════════════════════════════════════════
+     SECCIÓN 2 — PRESENTACIÓN DE LA HERRAMIENTA
+══════════════════════════════════════════ -->
+<div class="page section">
+  <div class="section-header">
+    <div class="section-num">2</div>
+    <div class="section-header-text">
+      <h2>Presentación de la herramienta</h2>
+      <div class="meta">⏱ <span>1:30 – 3:00</span> &nbsp;|&nbsp; Pantalla compartida — scroll lento por la calculadora</div>
+    </div>
+  </div>
+
+  <div class="block">
+    <div class="block-label pan">🖥 Pantalla</div>
+    <div class="screen-text">Mostrar la calculadora en su estado inicial. Scroll lento de arriba a abajo para que el espectador tenga una vista general antes de entrar en detalle.</div>
+  </div>
+
+  <div class="block">
+    <div class="block-label voz">🎙 Guión</div>
+    <div class="script-text">
+      "Esto que veis aquí es la Calculadora Solar para Minería Bitcoin 24/7. Es una herramienta que nació de una conversación que tuve con vosotros: muchos me preguntabais cómo hacer los cálculos para saber si les salía a cuenta instalar solar para el minero. Había un Excel que yo usaba, pero era complejo y no todo el mundo lo podía usar cómodamente. Así que lo convertimos en esto.<br><br>
+      Es completamente gratuita. No hay registro. Funciona en el navegador, incluido el móvil. Y todos los cálculos se hacen en tiempo real mientras vais cambiando los datos — no hay ningún servidor, todo corre en vuestro dispositivo.<br><br>
+      Tiene tres modos de uso: <strong>si no tienes solar</strong> y quieres saber qué instalación necesitas, <strong>si ya tienes solar</strong> y quieres calcular lo que te falta para añadir el minero, y un <strong>análisis de batería</strong> para saber si merece la pena añadirla a tu sistema. Vamos a verlo todo."
+    </div>
+  </div>
+
+  <div class="block no-break">
+    <div class="block-label pan">🖥 Pantalla</div>
+    <div class="screen-text">Señalar brevemente las tres secciones principales mientras se habla: los inputs (arriba), los resultados del sistema solar (medio), y el análisis de batería (abajo).</div>
+  </div>
+
+  <div class="block">
+    <div class="block-label voz">🎙 Continuación</div>
+    <div class="script-text">
+      "En la parte de arriba tenéis todos los inputs — los datos que vosotros introducís. En el centro, los resultados: cuántos paneles, cuántas baterías, qué coste tiene todo y cuándo lo amortizáis. Y más abajo, el análisis específico de la batería con una tabla año a año que os dice exactamente cuándo empezáis a ganar dinero con ella versus sin ella. Empecemos por el principio."
+    </div>
+  </div>
+</div>
+
+<!-- ══════════════════════════════════════════
+     SECCIÓN 3 — TOUR DE INPUTS
+══════════════════════════════════════════ -->
+<div class="page section">
+  <div class="section-header">
+    <div class="section-num">3</div>
+    <div class="section-header-text">
+      <h2>Tour completo de inputs</h2>
+      <div class="meta">⏱ <span>3:00 – 7:00</span> &nbsp;|&nbsp; Pantalla compartida — ir campo a campo</div>
+    </div>
+  </div>
+
+  <div class="block">
+    <div class="block-label voz">🎙 Bloque 3.1 — Equipo y Solar</div>
+    <div class="script-text">
+      "El primer bloque es <strong>Equipo y Solar</strong>. Lo primero que ponéis es el número de mineros: si tenéis más de uno, la calculadora multiplica todo automáticamente — consumo, BTC generado y costes.<br><br>
+      Luego el <strong>consumo del minero en vatios</strong>. ¿Dónde lo encontráis? En MiningNow.com — os lo dejo en la descripción. Buscáis vuestro equipo y os da el consumo exacto. Por ejemplo, un Antminer S21 Pro consume 3.510 W en modo máximo, o 2.830 W en modo eco. Ponéis el modo que vayáis a usar.<br><br>
+      Después las <strong>Horas Solares Pico</strong>. Esto es clave. Las HSP son las horas equivalentes de sol pleno que recibís cada día, como media anual. No son las horas de luz del día — son las horas efectivas de producción solar. En España interior son unas 5 horas y pico. En Colombia, unas 4,1. En México pueden llegar a 5,5 o 6. Usáis FootprintHero.com — también en la descripción — ponéis vuestra ciudad y os da el dato exacto."
+    </div>
+  </div>
+
+  <div class="block no-break">
+    <div class="block-label pan">🖥 Pantalla</div>
+    <div class="screen-text">Abrir FootprintHero.com en nueva pestaña, mostrar cómo se busca una ciudad y se obtiene el HSP. Volver a la calculadora.</div>
+  </div>
+
+  <div class="block">
+    <div class="block-label voz">🎙 Bloque 3.2 — Tarifa eléctrica</div>
+    <div class="script-text">
+      "Ahora el bloque más importante para el análisis de rentabilidad: <strong>la tarifa eléctrica</strong>. Aquí hay un cambio respecto a otras calculadoras que seguramente habéis visto. En vez de meter un único precio de la luz, aquí metéis los tres períodos de la tarifa 2.0TD: punta, llano y valle.<br><br>
+      Si estáis en España, podéis usar el preset '2.0TD España' que ya viene con los precios orientativos. Si tenéis una tarifa VE de Iberdrola — que es muy interesante si tenéis batería grande porque el precio valle es solo 3 céntimos — también hay un preset para eso.<br><br>
+      La calculadora pondera automáticamente qué precio pagáis de media con un consumo 24/7. Y debajo, en la tabla de desglose tarifario, os muestra exactamente cuántos kWh consume vuestro minero en cada período al año y cuánto os cuesta — eso es muy útil para ver si la Tarifa VE os conviene o no."
+    </div>
+  </div>
+
+  <div class="block">
+    <div class="block-label voz">🎙 Bloque 3.3 — Producción de BTC y dificultad</div>
+    <div class="script-text">
+      "En la columna de configuración avanzada tenéis la <strong>producción diaria de BTC</strong>. También lo sacáis de MiningNow.com. Ojo: usad el campo 'Income/day', no el 'Profit/day'. El Profit ya descuenta la electricidad y si lo usáis estaríais restando el coste dos veces.<br><br>
+      Y el <strong>crecimiento anual de la dificultad</strong>. Por defecto viene al 51,86%, que es la media histórica. Si queréis ser más conservadores, podéis bajarlo a un 30%. Si queréis ser más pesimistas, subirlo. Este parámetro es el que más afecta a la proyección a largo plazo — cuanto mayor es la dificultad, más rápido baja vuestra producción de BTC mes a mes aunque el precio no cambie."
+    </div>
+  </div>
+</div>
+
+<!-- ══════════════════════════════════════════
+     SECCIÓN 4 — DEMO EN VIVO
+══════════════════════════════════════════ -->
+<div class="page section">
+  <div class="section-header">
+    <div class="section-num">4</div>
+    <div class="section-header-text">
+      <h2>Demo en vivo — Caso real Antminer S21 Pro</h2>
+      <div class="meta">⏱ <span>7:00 – 11:00</span> &nbsp;|&nbsp; Pantalla compartida — introducir datos en tiempo real</div>
+    </div>
+  </div>
+
+  <div class="block">
+    <div class="block-label voz">🎙 Introducción del caso</div>
+    <div class="script-text">
+      "Vamos a hacer la demo con un caso real. He elegido el <em>Antminer S21 Pro</em> porque es uno de los equipos más populares ahora mismo, y vamos a simularlo en una ubicación típica de España. Estos son los datos que voy a introducir:"
+    </div>
+  </div>
+
+  <table class="demo-table no-break">
+    <thead>
+      <tr><th>Campo</th><th>Valor</th><th>¿Dónde lo saqué?</th></tr>
+    </thead>
+    <tbody>
+      <tr><td>Mineros</td><td>1 unidad</td><td>—</td></tr>
+      <tr><td>Consumo ASIC</td><td>3.510 W</td><td>MiningNow.com → S21 Pro</td></tr>
+      <tr><td>Panel solar</td><td>600 W</td><td>Mercado actual (JA Solar, Longi…)</td></tr>
+      <tr><td>HSP</td><td>5,2 h/día</td><td>FootprintHero → Madrid</td></tr>
+      <tr><td>Eficiencia</td><td>0,86</td><td>Factor estándar del sistema</td></tr>
+      <tr><td>Capacidad batería</td><td>15 kWh</td><td>LiFePO4 estándar del mercado</td></tr>
+      <tr><td>% Utilizable</td><td>80%</td><td>LiFePO4: del 20% al 100%</td></tr>
+      <tr><td>Coste panel</td><td>120 €</td><td>Precio actual mercado</td></tr>
+      <tr><td>Coste batería</td><td>3.500 €</td><td>LiFePO4 15 kWh (€233/kWh)</td></tr>
+      <tr><td>Ciclos batería</td><td>6.000</td><td>Garantía estándar LiFePO4</td></tr>
+      <tr><td>Inversor + extras</td><td>4.500 €</td><td>Instalación típica</td></tr>
+      <tr><td>Coste del minero</td><td>4.200 €</td><td>Precio actual S21 Pro</td></tr>
+      <tr><td>Producción BTC/día</td><td>0,000058</td><td>MiningNow.com → S21 Pro</td></tr>
+      <tr><td>Tarifa eléctrica</td><td>2.0TD España</td><td>Preset calculadora</td></tr>
+      <tr><td>Dificultad anual</td><td>51,86%</td><td>Media histórica</td></tr>
+    </tbody>
+  </table>
+
+  <div class="block">
+    <div class="block-label pan">🖥 Pantalla</div>
+    <div class="screen-text">Ir introduciendo cada dato mientras se explica. La calculadora va actualizando los resultados en tiempo real. Hacer una pausa al acabar para que el espectador vea los resultados.</div>
+  </div>
+
+  <div class="block">
+    <div class="block-label voz">🎙 Interpretando los resultados</div>
+    <div class="script-text">
+      "Bien, ya tenemos todos los datos. Vamos a ver qué nos dice la calculadora.<br><br>
+      Lo primero: <strong>cuántos paneles necesitamos</strong>. Con este equipo y estas HSP, necesitamos del orden de 16 a 20 paneles de 600 W. ¿Por qué tantos? Porque el S21 Pro consume 84 kWh al día — son las 24 horas multiplicadas por 3,51 kW. Y los paneles solo producen durante las 5,2 horas de sol. Tienen que generar mucho en poco tiempo para cubrir todo el día Y cargar las baterías para la noche.<br><br>
+      Lo segundo: <strong>cuántas baterías</strong>. La noche dura unas 18-19 horas sin sol en este caso. El minero necesita estar alimentado todo ese tiempo. Con baterías de 15 kWh al 80% de uso real = 12 kWh útiles cada una, la calculadora nos dice exactamente cuántas necesitamos.<br><br>
+      Y lo tercero: <strong>el coste total de la instalación solar</strong>. Aquí entra en juego la sección comparativa. Sin solar, pagáis la electricidad del minero a la red. Con solar, eso desaparece. La calculadora os dice en cuántos años se amortiza solo con el ahorro en luz — independientemente del precio de Bitcoin."
+    </div>
+  </div>
+
+  <div class="tip-box no-break">
+    <div class="tip-title">⚡ Dato clave para destacar en pantalla</div>
+    La amortización de la instalación solar se calcula exclusivamente con el ahorro en electricidad — no depende del precio de Bitcoin. Aunque BTC baje a cero, la solar sigue siendo una inversión en ahorro energético. Esto es lo que diferencia la solar de comprar más mineros.
+  </div>
+
+  <div class="block">
+    <div class="block-label voz">🎙 La tabla de proyección mensual</div>
+    <div class="script-text">
+      "Bajad un poco y veréis la tabla de proyección mensual. Aquí podéis ver mes a mes cuánto BTC generáis, cuánto ingresáis, y cuánto ganáis tanto con solar como sin solar. Fijaos en dos cosas importantes.<br><br>
+      Primero: la columna de BTC generado va bajando mes a mes aunque no cambiéis ningún dato. Eso es la dificultad creciente de la red. Cada mes hay más mineros compitiendo, y cada uno genera menos.<br><br>
+      Segundo: hay una fila marcada en naranja — el <em>halving</em>. En ese mes, la producción de BTC se reduce exactamente a la mitad de golpe. La calculadora lo aplica automáticamente para que la proyección sea realista."
+    </div>
+  </div>
+</div>
+
+<!-- ══════════════════════════════════════════
+     SECCIÓN 5 — ANÁLISIS BATERÍA
+══════════════════════════════════════════ -->
+<div class="page section">
+  <div class="section-header">
+    <div class="section-num">5</div>
+    <div class="section-header-text">
+      <h2>Análisis de batería — ¿sale a cuenta?</h2>
+      <div class="meta">⏱ <span>11:00 – 14:30</span> &nbsp;|&nbsp; Pantalla — sección de análisis de batería</div>
+    </div>
+  </div>
+
+  <div class="block">
+    <div class="block-label voz">🎙 Introducción a la sección</div>
+    <div class="script-text">
+      "Esta sección es de mis favoritas. La batería es la parte más cara de la instalación y la que más dudas genera. ¿De verdad merece la pena? ¿No es mejor tirar de la red por las noches y ahorrarse el coste de las baterías? Esta calculadora os da la respuesta numérica exacta.<br><br>
+      Bajamos a la sección <em>Análisis de rentabilidad de la batería</em>. Lo primero que veis son las tarjetas de KPIs:"
+    </div>
+  </div>
+
+  <div class="block">
+    <div class="block-label pan">🖥 Pantalla — señalar cada KPI</div>
+    <div class="screen-text">Señalar con el cursor cada tarjeta mientras se explica.</div>
+  </div>
+
+  <div class="block">
+    <div class="block-label voz">🎙 Explicando los KPIs</div>
+    <div class="script-text">
+      "<strong>Consumo nocturno del sistema</strong>: son los kWh que el minero necesita cada noche y que, sin batería, tendríais que comprar a la red. En nuestro caso del S21 Pro son aproximadamente 62 kWh nocturnos.<br><br>
+      <strong>Coste nocturno sin batería al año</strong>: lo que pagaríais a la eléctrica solo por las noches. Multiplicáis esos kWh por el precio medio de la tarifa y por 365 días. Puede ser una cantidad importante al año.<br><br>
+      <strong>Payback de la batería</strong>: cuántos años tardáis en recuperar la inversión en baterías solo con lo que os ahorráis en electricidad nocturna. Este es el dato clave.<br><br>
+      <strong>Vida útil estimada</strong>: con 6.000 ciclos y un ciclo por día, una batería LiFePO4 dura unos 16 años. Y al final de esos 16 años la batería no se muere — simplemente tiene un 80% de capacidad. En muchos casos se puede seguir usando.<br><br>
+      <strong>Coste real del kWh almacenado</strong>: cuánto os cuesta cada kWh que almacenáis durante toda la vida de la batería. Si ese número es menor que el precio de la electricidad de red, la batería os sale a cuenta a largo plazo."
+    </div>
+  </div>
+
+  <div class="block">
+    <div class="block-label voz">🎙 La tabla año a año</div>
+    <div class="script-text">
+      "Pero la parte más potente es la tabla de evolución año a año. Aquí veis dos columnas de coste acumulado: <em>sin batería</em> (paneles + lo que pagáis a la red por las noches) y <em>con batería</em> (mayor inversión inicial, pero 0 euros en electricidad nocturna para siempre).<br><br>
+      En los primeros años, la columna 'con batería' es más cara porque acabáis de desembolsar más. Pero llega un punto — el <em>breakeven</em>, que la calculadora marca en verde — en el que la batería empieza a ser más económica. A partir de ese año, cada año que pasa estáis ganando dinero respecto a no haberla instalado.<br><br>
+      Y fijaos también en la fila marcada con 'reponer bat.' — eso es cuando la batería llega al final de su vida útil y habría que reponerla. La calculadora lo incluye en el cálculo de coste acumulado para que la comparativa sea honesta."
+    </div>
+  </div>
+
+  <div class="block">
+    <div class="block-label voz">🎙 La tabla de sensibilidad</div>
+    <div class="script-text">
+      "Y para terminar con la batería, esta tabla de sensibilidad al precio. Aquí veis qué pasa si conseguís la batería a distintos precios por kWh: 100, 200, 300, 400, 500 euros por kWh. La fila resaltada es el precio que tenéis actualmente configurado. Esto os permite ver si merece la pena esperar a que bajen los precios o comprar ahora. En general, por debajo de 300 €/kWh el payback es muy razonable para este tipo de instalación."
+    </div>
+  </div>
+
+  <div class="tip-box no-break">
+    <div class="tip-title">📊 Punto de debate interesante para el vídeo</div>
+    Una batería de 30 kWh puede salir más económica a largo plazo que una de 40 kWh aunque cueste menos la de 40 en precio por kWh — porque la de 40 requiere más inversión inicial y el breakeven se alarga. La calculadora lo demuestra numéricamente. Es un contrarresultado que llama la atención de la audiencia.
+  </div>
+</div>
+
+<!-- ══════════════════════════════════════════
+     SECCIÓN 6 — MODO "YA TENGO SOLAR"
+══════════════════════════════════════════ -->
+<div class="page section">
+  <div class="section-header">
+    <div class="section-num">6</div>
+    <div class="section-header-text">
+      <h2>Modo "Ya tengo solar"</h2>
+      <div class="meta">⏱ <span>14:30 – 16:30</span> &nbsp;|&nbsp; Cambiar selector de modo en la calculadora</div>
+    </div>
+  </div>
+
+  <div class="block">
+    <div class="block-label voz">🎙 Presentación del modo</div>
+    <div class="script-text">
+      "Este modo es para los que ya tenéis instalación solar en casa — ya sea para autoconsumo, para el hogar, o para otra cosa — y queréis añadir un minero de Bitcoin. La pregunta es: ¿qué me falta? ¿Cuántos paneles más necesito? ¿Necesito más baterías o con las que tengo es suficiente?<br><br>
+      Para activarlo, tocáis el botón 'Sí tengo — calcular lo que me falta' en el selector de modo. Se abre una tarjeta nueva en verde donde introducís lo que ya tenéis."
+    </div>
+  </div>
+
+  <div class="block">
+    <div class="block-label pan">🖥 Pantalla</div>
+    <div class="screen-text">Hacer clic en el modo "Sí tengo solar". Se abre la tarjeta verde. Mostrar los campos disponibles: paneles existentes, W por panel, baterías existentes, capacidad de cada batería, consumo anual del hogar.</div>
+  </div>
+
+  <div class="block">
+    <div class="block-label voz">🎙 Explicando los campos</div>
+    <div class="script-text">
+      "Introducís cuántos paneles tenéis y de cuántos vatios cada uno. Luego cuántas baterías y de qué capacidad — esto es importante porque la calculadora necesita saber cuánta energía nocturna podéis almacenar ya.<br><br>
+      Y hay un campo muy útil: el consumo anual de vuestra vivienda en kWh. Lo encontráis directamente en vuestra factura eléctrica o en la web de vuestra comercializadora. En España, un hogar medio consume entre 3.000 y 4.500 kWh al año. La calculadora suma ese consumo al del minero y dimensiona la instalación para cubrirlo todo.<br><br>
+      El resultado es la sección de 'Análisis de tu instalación actual'. Ahí veis qué produce vuestra instalación actual, cuánto consume el minero más la vivienda, si vuestra instalación actual alcanza o no, y cuántos paneles y baterías adicionales necesitáis. Y por supuesto, el coste de esa ampliación."
+    </div>
+  </div>
+
+  <div class="block no-break">
+    <div class="block-label note">📝 Nota de producción</div>
+    <div class="note-text">
+      Mostrar un ejemplo concreto: "Tengo 8 paneles de 400 W, 1 batería de 15 kWh, y mi casa consume 3.500 kWh/año. ¿Cuánto me falta para el S21 Pro?" — Introducir estos datos en directo y leer el resultado. Es más impactante que explicar la teoría.
+    </div>
+  </div>
+</div>
+
+<!-- ══════════════════════════════════════════
+     SECCIÓN 7 — CIERRE Y CTA
+══════════════════════════════════════════ -->
+<div class="page section">
+  <div class="section-header">
+    <div class="section-num">7</div>
+    <div class="section-header-text">
+      <h2>Cierre, simulación BTC y llamada a la acción</h2>
+      <div class="meta">⏱ <span>16:30 – 18:00</span> &nbsp;|&nbsp; Cámara frontal + pantalla con simulación</div>
+    </div>
+  </div>
+
+  <div class="block">
+    <div class="block-label voz">🎙 Simulación de precio objetivo</div>
+    <div class="script-text">
+      "Antes de cerrar, os enseño la sección de simulación que está justo debajo de la comparativa. Aquí podéis introducir el precio de Bitcoin que vosotros creéis que puede alcanzar — 200.000, 250.000, 500.000 euros — y la calculadora os dice cuál sería vuestra ganancia diaria, anual, y cuántos años tardaríais en recuperar toda la inversión: el minero, los paneles, las baterías, todo.<br><br>
+      Esto no es una predicción de precio — eso no lo sabe nadie. Pero os ayuda a entender: <em>si Bitcoin llega a X, ¿cuándo me voy al verde?</em> Y podéis comparar diferentes escenarios en segundos."
+    </div>
+  </div>
+
+  <div class="block">
+    <div class="block-label pan">🖥 Pantalla</div>
+    <div class="screen-text">Ir a la sección de simulación. Cambiar el precio a 200.000 €, luego a 300.000 €. Mostrar cómo cambia el ROI total en tiempo real. Hacer una pausa para que el espectador lo procese.</div>
+  </div>
+
+  <div class="block">
+    <div class="block-label voz">🎙 Cierre a cámara</div>
+    <div class="script-text">
+      "Y esto es todo lo que podéis hacer con esta calculadora. Es gratuita, la podéis usar tantas veces como queráis con distintos equipos, distintas tarifas, distintas ubicaciones. Está pensada para que cualquiera — aunque no sepa nada de ingeniería solar — pueda tener los números claros antes de tomar una decisión de miles de euros.<br><br>
+      Os dejo el enlace en la descripción y en los comentarios. Si tenéis dudas sobre algún campo o algún resultado que no entendéis, preguntadme en los comentarios — intentaré responder a todos.<br><br>
+      Y si el vídeo os ha resultado útil, ya sabéis: like, suscripción, y compartirlo con alguien que esté pensando en montar solar para su minero. Eso me ayuda un montón a seguir haciendo este tipo de contenido. Nos vemos en el próximo."
+    </div>
+  </div>
+
+  <div class="cta-box">
+    <h3>📌 Call to Action final</h3>
+    <p>
+      "Enlace a la calculadora en la descripción 👇 · Comenta con los resultados de tu equipo 💬<br>
+      Si te ha gustado, dale like y compártelo con alguien que esté pensando en solar 🔄"
+    </p>
+  </div>
+
+  <div class="tip-box no-break">
+    <div class="tip-title">🎬 Ideas para reutilizar este contenido</div>
+    <ul style="margin: 8px 0 0 18px; color: var(--text2); font-size: 10.5pt; line-height: 1.8;">
+      <li><strong>Short de YouTube / Reel</strong>: Solo el hook (0:00–1:30) + el resultado final de la demo. Máximo 60 segundos.</li>
+      <li><strong>Hilo de Twitter/X</strong>: Un tweet por sección con captura de la calculadora.</li>
+      <li><strong>Post de Instagram</strong>: Carrusel con los 5 KPIs de batería de la sección 5.</li>
+      <li><strong>Pinned comment</strong>: En el vídeo, poner los datos del ejemplo del S21 Pro para que otros los usen como referencia.</li>
+    </ul>
+  </div>
+
+  <!-- Checklist final de producción -->
+  <div style="margin-top:28px;">
+    <div style="font-size:11pt;font-weight:700;margin-bottom:12px;color:var(--text);">✅ Checklist post-grabación</div>
+    <ul class="checklist">
+      <li>Añadir el enlace a la calculadora en la descripción (primero en la lista)</li>
+      <li>Añadir timestamps en la descripción con los minutos de cada sección</li>
+      <li>Añadir MiningNow.com y FootprintHero.com en la descripción</li>
+      <li>Crear una tarjeta al final del vídeo apuntando al anterior sobre minería solar</li>
+      <li>Responder comentarios con dudas sobre la calculadora durante las primeras 24h</li>
+      <li>Pinear en comentarios el resultado del caso de demo para que sirva de referencia</li>
+    </ul>
+  </div>
+</div>
+
+<!-- ══════════════════════════════════════════
+     PIE DE PÁGINA FINAL
+══════════════════════════════════════════ -->
+<div class="page" style="page-break-before: always;">
+  <div style="text-align:center; padding: 40px 0;">
+    <div style="font-size:36px; margin-bottom:16px;">₿</div>
+    <div style="font-size:13pt; font-weight:800; color:var(--text); margin-bottom:6px;">Calculadora Solar para Minería Bitcoin 24/7</div>
+    <div style="font-size:10pt; color:var(--gray);">Guión generado · 2025</div>
+  </div>
+
+  <div style="background:var(--light); border-radius:12px; padding:24px 28px; border:1px solid var(--border);">
+    <div style="font-weight:700; font-size:11pt; margin-bottom:16px; color:var(--text);">⏱ Resumen de tiempos</div>
+    <div class="timeline">
+      <div class="tl-item"><div class="tl-time">1:30</div><div class="tl-lbl">Hook</div></div>
+      <div class="tl-item"><div class="tl-time">1:30</div><div class="tl-lbl">Presentación</div></div>
+      <div class="tl-item"><div class="tl-time">4:00</div><div class="tl-lbl">Tour inputs</div></div>
+      <div class="tl-item"><div class="tl-time">4:00</div><div class="tl-lbl">Demo</div></div>
+      <div class="tl-item"><div class="tl-time">3:30</div><div class="tl-lbl">Batería</div></div>
+      <div class="tl-item"><div class="tl-time">2:00</div><div class="tl-lbl">Ya tengo</div></div>
+      <div class="tl-item"><div class="tl-time">1:30</div><div class="tl-lbl">Cierre</div></div>
+    </div>
+
+    <div style="margin-top:20px; font-size:10pt; color:var(--text2); line-height:1.8;">
+      <strong>Simbología del guión:</strong><br>
+      🎙 <strong>Voz</strong> — texto que se dice a cámara o en off &nbsp;|&nbsp;
+      🖥 <strong>Pantalla</strong> — qué se muestra en cada momento &nbsp;|&nbsp;
+      📝 <strong>Nota</strong> — indicación de producción &nbsp;|&nbsp;
+      💡 <strong>Consejo</strong> — mejora opcional del vídeo
+    </div>
+  </div>
+</div>
+
+</body>
+</html>
