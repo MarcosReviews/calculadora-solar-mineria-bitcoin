@@ -2,7 +2,7 @@
 
 **Herramienta gratuita e interactiva para calcular si merece la pena instalar energía solar para minar Bitcoin.**
 
-👉 [Ver la calculadora en vivo](#) *(actualiza este enlace cuando la publiques)*
+👉 [Ver la calculadora en vivo] dynamic-starship-cd670a.netlify.app
 
 ---
 
@@ -69,7 +69,7 @@ No necesita conexión a internet excepto para la actualización automática del 
 
 - Abre un **Issue** describiendo la mejora o el error encontrado
 - Haz un **Fork** + **Pull Request** con tu propuesta
-- Comenta en el [canal de YouTube](#) *(actualiza el enlace)*
+- Comenta en el canal de YouTube: https://www.youtube.com/@MarcosReviews
 
 Ideas en las que se puede trabajar:
 - [ ] Soporte para más países (tarifas de México, Colombia, Argentina…)
