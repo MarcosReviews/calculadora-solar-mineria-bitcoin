@@ -225,7 +225,7 @@
       <div class="field">
         <label>Dificultad de red actual</label>
         <div class="input-wrap">
-          <input type="number" id="dificultadRed" value="122" min="1" step="1" oninput="recalcular()">
+          <input type="number" id="dificultadRed" value="138" min="1" step="1" oninput="recalcular()">
           <span class="unit">T (×10¹²)</span>
         </div>
         <div class="btc-status" id="diffStatus" style="color:var(--text3);font-size:0.7rem;margin-top:4px;"></div>
@@ -499,21 +499,41 @@
 
   // ── FETCH NETWORK DIFFICULTY ──────────────────────────────────────────
   async function fetchDifficulty() {
+    $('diffStatus').style.color = 'var(--text3)';
     $('diffStatus').textContent = 'Obteniendo dificultad…';
+
+    // Intento 1: mempool.space (campo currentDifficulty)
     try {
       const r = await fetch('https://mempool.space/api/v1/difficulty-adjustment');
       const d = await r.json();
-      if (d.currentDifficulty) {
-        const diffT = (d.currentDifficulty / 1e12).toFixed(1);
+      const raw = d.currentDifficulty ?? d.difficulty;
+      if (raw && raw > 1e10) {
+        const diffT = (raw / 1e12).toFixed(1);
         $('dificultadRed').value = diffT;
         $('diffStatus').style.color = 'var(--green)';
-        $('diffStatus').textContent = `✓ Dificultad actual: ${diffT} T`;
+        $('diffStatus').textContent = `✓ mempool.space — ${diffT} T`;
         recalcular();
+        return;
       }
-    } catch {
-      $('diffStatus').style.color = 'var(--text3)';
-      $('diffStatus').textContent = 'Valor estimado — actualiza si lo conoces';
-    }
+    } catch (_) {}
+
+    // Intento 2: blockchain.info (devuelve un número plano)
+    try {
+      const r = await fetch('https://blockchain.info/q/getdifficulty');
+      const raw = parseFloat(await r.text());
+      if (raw > 1e10) {
+        const diffT = (raw / 1e12).toFixed(1);
+        $('dificultadRed').value = diffT;
+        $('diffStatus').style.color = 'var(--green)';
+        $('diffStatus').textContent = `✓ blockchain.info — ${diffT} T`;
+        recalcular();
+        return;
+      }
+    } catch (_) {}
+
+    // Sin conexión o CORS al abrir como archivo local
+    $('diffStatus').style.color = 'var(--orange)';
+    $('diffStatus').textContent = '⚠ No se pudo obtener — introduce la dificultad manualmente (ej: 138)';
   }
 
   // ── INIT ─────────────────────────────────────────────────────────────
