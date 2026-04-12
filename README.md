@@ -50,14 +50,13 @@ Vida útil batería = ciclos / 365 días
 ## 📂 Estructura
 
 ```
-calculadora-solar-mineria-v9.html   ← Versión actual (la que usar)
-guion-video-calculadora-solar.html  ← Guión del vídeo de presentación
+calculadora-solar-mineria-v10.html  ← Versión actual (la que usar)
 README.md
 ```
 
 ## 🚀 Uso
 
-1. Descarga `calculadora-solar-mineria-v9.html`
+1. Descarga `calculadora-solar-mineria-v10.html`
 2. Ábrelo en cualquier navegador moderno (Chrome, Firefox, Edge)
 3. Introduce tus datos y obtén el análisis completo
 

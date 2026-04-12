@@ -1,0 +1,2770 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Calculadora Solar para Minería Bitcoin 24/7</title>
+  <script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.0/dist/chart.umd.min.js"></script>
+  <style>
+    :root {
+      --bg: #0d0d0d;
+      --bg2: #161616;
+      --bg3: #1e1e1e;
+      --border: #2a2a2a;
+      --orange: #f7931a;
+      --green: #00d084;
+      --red: #ff4560;
+      --blue: #4e9af1;
+      --text: #e8e8e8;
+      --text2: #999;
+      --text3: #666;
+      --radius: 12px;
+      --header-bg: linear-gradient(135deg, #1a1a1a 0%, #111 100%);
+      --shadow: rgba(0,0,0,0.4);
+    }
+
+    /* ── MODO CLARO ── */
+    html.light {
+      --bg: #f0f2f5;
+      --bg2: #ffffff;
+      --bg3: #f5f6fa;
+      --border: #dde1ec;
+      --text: #1a1a2e;
+      --text2: #50526b;
+      --text3: #8a8da8;
+      --header-bg: linear-gradient(135deg, #ffffff 0%, #f5f6fa 100%);
+      --shadow: rgba(0,0,0,0.06);
+    }
+    html.light body { background: var(--bg); }
+    html.light header { box-shadow: 0 2px 8px var(--shadow); }
+    html.light .input-card,
+    html.light .result-card,
+    html.light .compare-card,
+    html.light .guide-banner,
+    html.light .guide-step,
+    html.light .guide-logic,
+    html.light .sim-card,
+    html.light .table-card,
+    html.light .chart-card {
+      box-shadow: 0 1px 4px var(--shadow);
+    }
+    html.light .compare-savings {
+      background: rgba(0,208,132,0.06);
+    }
+    html.light .guide-banner {
+      background: linear-gradient(135deg, rgba(247,147,26,0.06) 0%, rgba(247,147,26,0.02) 100%);
+    }
+    html.light thead tr { background: rgba(247,147,26,0.06); }
+    html.light tbody tr:hover { background: rgba(0,0,0,0.02); }
+    html.light tbody tr.halving-row { background: rgba(247,147,26,0.05) !important; }
+    html.light .mode-selector,
+    html.light .amp-card { box-shadow: 0 1px 4px var(--shadow); }
+    * { box-sizing: border-box; margin: 0; padding: 0; }
+    body {
+      background: var(--bg);
+      color: var(--text);
+      font-family: 'Segoe UI', system-ui, -apple-system, sans-serif;
+      min-height: 100vh;
+    }
+
+    /* ── THEME TOGGLE ── */
+    .theme-btn {
+      display: flex; align-items: center; gap: 7px;
+      background: var(--bg3); border: 1px solid var(--border);
+      border-radius: 20px; padding: 6px 14px;
+      cursor: pointer; font-size: 0.78rem; font-weight: 600;
+      color: var(--text2); transition: all 0.2s;
+      white-space: nowrap; flex-shrink: 0;
+    }
+    .theme-btn:hover { border-color: var(--orange); color: var(--orange); }
+    .theme-btn .theme-icon { font-size: 1rem; line-height: 1; }
+
+    /* ── HEADER ── */
+    header {
+      background: var(--header-bg);
+      border-bottom: 1px solid var(--border);
+      padding: 20px 40px;
+      display: flex; align-items: center; gap: 16px;
+      position: sticky; top: 0; z-index: 100;
+    }
+    .logo {
+      width: 48px; height: 48px; background: var(--orange); border-radius: 50%;
+      display: flex; align-items: center; justify-content: center;
+      font-size: 24px; font-weight: bold; color: white;
+      box-shadow: 0 0 20px rgba(247,147,26,0.4); flex-shrink: 0;
+    }
+    header h1 { font-size: 1.3rem; font-weight: 700; }
+    header h1 span { color: var(--orange); }
+    header p { font-size: 0.8rem; color: var(--text2); margin-top: 2px; }
+    .badge {
+      margin-left: auto; border: 1px solid;
+      padding: 4px 12px; border-radius: 20px;
+      font-size: 0.75rem; font-weight: 700; white-space: nowrap;
+    }
+
+    /* ── MAIN ── */
+    main { max-width: 1400px; margin: 0 auto; padding: 32px 20px; }
+
+    .section-title {
+      font-size: 0.7rem; font-weight: 700; letter-spacing: 0.12em;
+      text-transform: uppercase; color: var(--orange);
+      margin-bottom: 14px; display: flex; align-items: center; gap: 8px;
+    }
+    .section-title::after { content:''; flex:1; height:1px; background:var(--border); }
+
+    /* ── GUÍA PASO A PASO ── */
+    .guide-banner {
+      background: linear-gradient(135deg, rgba(247,147,26,0.08) 0%, rgba(247,147,26,0.03) 100%);
+      border: 1px solid rgba(247,147,26,0.2);
+      border-radius: var(--radius);
+      margin-bottom: 28px;
+      overflow: hidden;
+    }
+    .guide-toggle {
+      display: flex; align-items: center; justify-content: space-between;
+      padding: 16px 22px; cursor: pointer; user-select: none;
+      gap: 12px;
+    }
+    .guide-toggle:hover { background: rgba(247,147,26,0.05); }
+    .guide-toggle-left { display: flex; align-items: center; gap: 12px; }
+    .guide-toggle-left .icon {
+      width: 32px; height: 32px; background: var(--orange);
+      border-radius: 8px; display: flex; align-items: center;
+      justify-content: center; font-size: 16px; flex-shrink: 0;
+    }
+    .guide-toggle-left h2 { font-size: 0.95rem; font-weight: 700; }
+    .guide-toggle-left p { font-size: 0.78rem; color: var(--text2); margin-top: 1px; }
+    .guide-chevron {
+      color: var(--orange); font-size: 1rem; transition: transform 0.3s;
+      flex-shrink: 0;
+    }
+    .guide-chevron.open { transform: rotate(180deg); }
+    .guide-body {
+      display: none; padding: 0 22px 22px;
+    }
+    .guide-body.open { display: block; }
+    .guide-steps {
+      display: grid; grid-template-columns: repeat(auto-fill, minmax(280px, 1fr));
+      gap: 14px; margin-bottom: 18px;
+    }
+    .guide-step {
+      background: var(--bg2); border: 1px solid var(--border);
+      border-radius: 10px; padding: 14px 16px;
+      display: flex; gap: 12px; align-items: flex-start;
+    }
+    .step-num {
+      width: 26px; height: 26px; background: var(--orange);
+      border-radius: 50%; display: flex; align-items: center;
+      justify-content: center; font-size: 0.72rem; font-weight: 800;
+      color: white; flex-shrink: 0; margin-top: 1px;
+    }
+    .step-content h4 { font-size: 0.82rem; font-weight: 700; margin-bottom: 4px; }
+    .step-content p { font-size: 0.75rem; color: var(--text2); line-height: 1.5; }
+    .step-content a { color: var(--orange); text-decoration: none; }
+    .step-content a:hover { text-decoration: underline; }
+
+    .guide-logic {
+      background: var(--bg2); border: 1px solid var(--border);
+      border-radius: 10px; padding: 16px 20px;
+    }
+    .guide-logic h3 {
+      font-size: 0.8rem; font-weight: 700; color: var(--text);
+      margin-bottom: 12px; padding-bottom: 10px;
+      border-bottom: 1px solid var(--border);
+    }
+    .logic-grid {
+      display: grid; grid-template-columns: repeat(auto-fill, minmax(240px, 1fr));
+      gap: 12px;
+    }
+    .logic-item { }
+    .logic-item .ltitle {
+      font-size: 0.72rem; font-weight: 700; color: var(--orange);
+      margin-bottom: 4px; text-transform: uppercase; letter-spacing: 0.05em;
+    }
+    .logic-item .ltext {
+      font-size: 0.74rem; color: var(--text2); line-height: 1.55;
+    }
+    .logic-item .ltext strong { color: var(--text); }
+
+    /* ── MODE SELECTOR ── */
+    .mode-selector {
+      background: var(--bg2); border: 1px solid var(--border);
+      border-radius: var(--radius); padding: 18px 22px;
+      margin-bottom: 24px; display: flex; align-items: center;
+      gap: 20px; flex-wrap: wrap;
+    }
+    .mode-selector-label {
+      font-size: 0.85rem; font-weight: 700; color: var(--text);
+      white-space: nowrap; flex-shrink: 0;
+    }
+    .mode-selector-label span { color: var(--text2); font-weight: 400; font-size: 0.78rem; margin-left: 6px; }
+    .mode-pills {
+      display: flex; gap: 10px; flex-wrap: wrap;
+    }
+    .mode-pill {
+      padding: 9px 18px; border-radius: 24px; font-size: 0.82rem; font-weight: 600;
+      cursor: pointer; border: 1.5px solid var(--border); background: var(--bg3);
+      color: var(--text2); transition: all 0.2s; white-space: nowrap;
+    }
+    .mode-pill:hover { border-color: var(--orange); color: var(--orange); }
+    .mode-pill.active {
+      background: rgba(247,147,26,0.12); border-color: var(--orange);
+      color: var(--orange);
+    }
+
+    /* ── AMPLIACION RESULTS ── */
+    .ampliacion-section { margin-bottom: 32px; }
+    .ampliacion-grid {
+      display: grid; grid-template-columns: 1fr 1fr; gap: 20px;
+    }
+    @media (max-width: 700px) { .ampliacion-grid { grid-template-columns: 1fr; } }
+    .amp-card {
+      background: var(--bg2); border: 1px solid var(--border);
+      border-radius: var(--radius); padding: 20px;
+    }
+    .amp-card h4 {
+      font-size: 0.78rem; font-weight: 700; letter-spacing: 0.08em;
+      text-transform: uppercase; margin-bottom: 16px; padding-bottom: 12px;
+      border-bottom: 1px solid var(--border);
+    }
+    .amp-card h4.h-green { color: var(--green); }
+    .amp-card h4.h-orange { color: var(--orange); }
+    .amp-row {
+      display: flex; justify-content: space-between; align-items: baseline;
+      padding: 7px 0; border-bottom: 1px solid var(--border); font-size: 0.82rem;
+    }
+    .amp-row:last-child { border-bottom: none; }
+    .amp-lbl { color: var(--text2); }
+    .amp-val { font-weight: 700; color: var(--text); }
+    .amp-val.green { color: var(--green); }
+    .amp-val.orange { color: var(--orange); }
+    .amp-val.red { color: var(--red); }
+
+    /* ── BATTERY ROI SECTION ── */
+    .bat-roi-section { margin-bottom: 32px; }
+    .bat-roi-header {
+      display: flex; align-items: center; justify-content: space-between;
+      flex-wrap: wrap; gap: 12px; margin-bottom: 20px;
+    }
+    .bat-roi-kpi {
+      display: grid; grid-template-columns: repeat(auto-fill, minmax(200px, 1fr));
+      gap: 14px; margin-bottom: 20px;
+    }
+    .bat-kpi-card {
+      background: var(--bg2); border: 1px solid var(--border);
+      border-radius: var(--radius); padding: 16px 18px;
+      display: flex; flex-direction: column; gap: 4px;
+    }
+    .bat-kpi-card.accent { border-color: rgba(247,147,26,0.35); background: rgba(247,147,26,0.04); }
+    .bat-kpi-card.accent-green { border-color: rgba(0,208,132,0.35); background: rgba(0,208,132,0.04); }
+    .bat-kpi-label { font-size: 0.71rem; font-weight: 700; text-transform: uppercase; letter-spacing: 0.07em; color: var(--text3); }
+    .bat-kpi-value { font-size: 1.35rem; font-weight: 800; color: var(--orange); line-height: 1.1; }
+    .bat-kpi-value.green { color: var(--green); }
+    .bat-kpi-value.red { color: var(--red); }
+    .bat-kpi-value.blue { color: var(--blue); }
+    .bat-kpi-sub { font-size: 0.72rem; color: var(--text3); }
+
+    .bat-compare-wrap {
+      display: grid; grid-template-columns: 1fr 1fr; gap: 20px; margin-bottom: 20px;
+    }
+    @media (max-width: 700px) { .bat-compare-wrap { grid-template-columns: 1fr; } }
+    .bat-compare-card {
+      background: var(--bg2); border: 1px solid var(--border);
+      border-radius: var(--radius); padding: 18px 20px;
+    }
+    .bat-compare-card h5 {
+      font-size: 0.78rem; font-weight: 700; text-transform: uppercase;
+      letter-spacing: 0.07em; margin-bottom: 14px; padding-bottom: 10px;
+      border-bottom: 1px solid var(--border);
+    }
+    .bat-row {
+      display: flex; justify-content: space-between; align-items: baseline;
+      padding: 6px 0; border-bottom: 1px solid var(--border); font-size: 0.81rem;
+    }
+    .bat-row:last-child { border-bottom: none; }
+    .bat-row-lbl { color: var(--text2); }
+    .bat-row-val { font-weight: 700; }
+
+    .bat-timeline {
+      background: var(--bg2); border: 1px solid var(--border);
+      border-radius: var(--radius); overflow: hidden;
+    }
+    .bat-timeline-header {
+      padding: 14px 20px; border-bottom: 1px solid var(--border);
+      font-size: 0.78rem; font-weight: 700; text-transform: uppercase;
+      letter-spacing: 0.07em; color: var(--text2);
+    }
+    .bat-timeline table { width: 100%; border-collapse: collapse; }
+    .bat-timeline thead tr { background: rgba(247,147,26,0.06); }
+    .bat-timeline th {
+      padding: 10px 14px; font-size: 0.72rem; font-weight: 700;
+      text-align: right; color: var(--text2); text-transform: uppercase;
+      letter-spacing: 0.05em; white-space: nowrap;
+    }
+    .bat-timeline th:first-child { text-align: left; }
+    .bat-timeline td {
+      padding: 9px 14px; font-size: 0.8rem; text-align: right;
+      border-bottom: 1px solid var(--border);
+    }
+    .bat-timeline td:first-child { text-align: left; font-weight: 700; }
+    .bat-timeline tbody tr:hover { background: rgba(255,255,255,0.02); }
+    .bat-timeline tbody tr.bat-breakeven { background: rgba(0,208,132,0.07) !important; }
+    .bat-timeline tbody tr.bat-breakeven td { font-weight: 700; }
+    .bat-timeline tbody tr.bat-year10 { background: rgba(78,154,241,0.06) !important; }
+    .bat-timeline tbody tr.bat-year10 td { }
+    .breakeven-badge {
+      display: inline-block; background: var(--green); color: white;
+      font-size: 0.6rem; font-weight: 800; padding: 2px 6px;
+      border-radius: 4px; margin-left: 6px; vertical-align: middle;
+    }
+    html.light .bat-kpi-card, html.light .bat-compare-card,
+    html.light .bat-timeline, html.light .bat-recomendacion,
+    html.light .bat-sensibilidad { box-shadow: 0 1px 4px var(--shadow); }
+    html.light .bat-timeline thead tr { background: rgba(247,147,26,0.06); }
+    html.light .bat-timeline tbody tr:hover { background: rgba(0,0,0,0.02); }
+    html.light .bat-timeline tbody tr.bat-breakeven { background: rgba(0,208,132,0.06) !important; }
+    html.light .bat-timeline tbody tr.bat-year10 { background: rgba(78,154,241,0.05) !important; }
+    html.light .bat-sensibilidad thead tr { background: rgba(247,147,26,0.06); }
+    html.light .bat-sensibilidad tbody tr:hover { background: rgba(0,0,0,0.02); }
+    html.light .bat-sensibilidad tbody tr.sens-current { background: rgba(247,147,26,0.12) !important; }
+
+    /* Recomendación banner */
+    .bat-recomendacion {
+      background: linear-gradient(135deg, rgba(0,208,132,0.08) 0%, rgba(0,208,132,0.03) 100%);
+      border: 1px solid rgba(0,208,132,0.25);
+      border-radius: var(--radius); padding: 18px 22px;
+      margin-bottom: 20px; display: flex; align-items: flex-start; gap: 14px;
+    }
+    .bat-rec-icon {
+      width: 36px; height: 36px; background: var(--green); border-radius: 8px;
+      display: flex; align-items: center; justify-content: center;
+      font-size: 18px; flex-shrink: 0;
+    }
+    .bat-rec-content h4 { font-size: 0.85rem; font-weight: 700; color: var(--green); margin-bottom: 5px; }
+    .bat-rec-content p { font-size: 0.78rem; color: var(--text2); line-height: 1.6; }
+    .bat-rec-content strong { color: var(--text); }
+
+    /* Sensibilidad tabla */
+    .bat-sensibilidad {
+      background: var(--bg2); border: 1px solid var(--border);
+      border-radius: var(--radius); overflow: hidden; margin-top: 20px;
+    }
+    .bat-sensibilidad-header {
+      padding: 14px 20px; border-bottom: 1px solid var(--border);
+      display: flex; align-items: center; justify-content: space-between; flex-wrap: wrap; gap: 8px;
+    }
+    .bat-sensibilidad-header span:first-child {
+      font-size: 0.78rem; font-weight: 700; text-transform: uppercase; letter-spacing: 0.07em; color: var(--text2);
+    }
+    .bat-sensibilidad-header .sens-note {
+      font-size: 0.71rem; color: var(--text3); font-weight: 400; text-transform: none; letter-spacing: 0;
+    }
+    .bat-sensibilidad table { width: 100%; border-collapse: collapse; }
+    .bat-sensibilidad thead tr { background: rgba(247,147,26,0.06); }
+    .bat-sensibilidad th {
+      padding: 9px 14px; font-size: 0.71rem; font-weight: 700; text-align: right;
+      color: var(--text2); text-transform: uppercase; letter-spacing: 0.05em; white-space: nowrap;
+    }
+    .bat-sensibilidad th:first-child { text-align: left; }
+    .bat-sensibilidad td {
+      padding: 8px 14px; font-size: 0.79rem; text-align: right; border-bottom: 1px solid var(--border);
+    }
+    .bat-sensibilidad td:first-child { text-align: left; font-weight: 700; }
+    .bat-sensibilidad tbody tr:hover { background: rgba(255,255,255,0.02); }
+    .bat-sensibilidad tbody tr.sens-current {
+      background: rgba(247,147,26,0.13) !important;
+    }
+    .bat-sensibilidad tbody tr.sens-current td:first-child {
+      border-left: 3px solid var(--orange);
+      font-weight: 800;
+    }
+    .bat-sensibilidad tbody tr.sens-current td:first-child::after {
+      content: ' ← tu precio'; font-size: 0.65rem; color: var(--orange); font-weight: 400;
+    }
+
+    /* ── TARIFA PRESET BUTTON ── */
+    .tarifa-presets { display: flex; gap: 6px; flex-wrap: wrap; margin-bottom: 10px; }
+    .tarifa-preset-btn {
+      padding: 5px 11px; font-size: 0.71rem; font-weight: 700;
+      border-radius: 14px; border: 1.5px solid var(--border);
+      background: var(--bg3); color: var(--text2); cursor: pointer; transition: all 0.2s;
+    }
+    .tarifa-preset-btn:hover { border-color: var(--orange); color: var(--orange); }
+    .tarifa-preset-btn.active { background: rgba(247,147,26,0.12); border-color: var(--orange); color: var(--orange); }
+    .tarifa-media-row {
+      display: flex; align-items: center; justify-content: space-between;
+      background: var(--bg3); border: 1px solid var(--border);
+      border-radius: 8px; padding: 8px 12px; margin-top: 8px; gap: 8px;
+    }
+    .tarifa-media-lbl { font-size: 0.71rem; color: var(--text3); }
+    .tarifa-media-val { font-size: 0.9rem; font-weight: 800; color: var(--orange); }
+
+    /* ── TARIFF BREAKDOWN TABLE ── */
+    .tarifa-breakdown {
+      background: var(--bg2); border: 1px solid var(--border);
+      border-radius: var(--radius); overflow: hidden; margin-bottom: 24px;
+    }
+    .tarifa-breakdown-header {
+      padding: 13px 18px; border-bottom: 1px solid var(--border);
+      font-size: 0.76rem; font-weight: 700; text-transform: uppercase;
+      letter-spacing: 0.07em; color: var(--text2);
+    }
+    .tarifa-breakdown table { width: 100%; border-collapse: collapse; }
+    .tarifa-breakdown thead tr { background: rgba(247,147,26,0.06); }
+    .tarifa-breakdown th {
+      padding: 9px 14px; font-size: 0.7rem; font-weight: 700; text-align: right;
+      color: var(--text2); text-transform: uppercase; letter-spacing: 0.05em;
+    }
+    .tarifa-breakdown th:first-child { text-align: left; }
+    .tarifa-breakdown td {
+      padding: 8px 14px; font-size: 0.79rem; text-align: right;
+      border-bottom: 1px solid var(--border);
+    }
+    .tarifa-breakdown td:first-child { text-align: left; font-weight: 700; }
+    .tarifa-breakdown tr.tarifa-total { background: rgba(247,147,26,0.05); }
+    .tarifa-breakdown tr.tarifa-total td { border-bottom: none; font-weight: 700; }
+    html.light .tarifa-breakdown { box-shadow: 0 1px 4px var(--shadow); }
+    html.light .tarifa-breakdown thead tr,
+    html.light .tarifa-breakdown tr.tarifa-total { background: rgba(247,147,26,0.05); }
+
+    /* ── INPUTS ── */
+    .inputs-grid {
+      display: grid; grid-template-columns: repeat(auto-fill, minmax(280px, 1fr));
+      gap: 20px; margin-bottom: 32px;
+    }
+    @media (max-width: 640px) { .inputs-grid { grid-template-columns: 1fr; } }
+
+    .input-card {
+      background: var(--bg2); border: 1px solid var(--border);
+      border-radius: var(--radius); padding: 20px;
+    }
+    .input-card h3 {
+      font-size: 0.8rem; font-weight: 700; letter-spacing: 0.08em;
+      text-transform: uppercase; color: var(--text2);
+      margin-bottom: 16px; padding-bottom: 12px;
+      border-bottom: 1px solid var(--border);
+    }
+    .field { margin-bottom: 14px; }
+    .field:last-child { margin-bottom: 0; }
+    .field label { display: block; font-size: 0.78rem; color: var(--text2); margin-bottom: 5px; }
+    .field label .hint { font-size: 0.69rem; color: var(--text3); display: block; margin-top: 1px; line-height: 1.4; }
+    .ref-link {
+      display: inline-flex; align-items: center; gap: 3px;
+      color: var(--orange); text-decoration: none;
+      font-size: 0.68rem; font-weight: 600; opacity: 0.9; transition: opacity 0.15s;
+    }
+    .ref-link:hover { opacity: 1; text-decoration: underline; }
+
+    /* Info tip toggle */
+    .info-tip-toggle {
+      display: inline-flex; align-items: center; gap: 3px;
+      cursor: pointer; color: var(--blue); font-size: 0.68rem;
+      font-weight: 600; margin-top: 3px; user-select: none;
+      background: none; border: none; padding: 0;
+    }
+    .info-tip-toggle:hover { text-decoration: underline; }
+    .info-tip-box {
+      display: none; margin-top: 8px;
+      background: rgba(78,154,241,0.07);
+      border: 1px solid rgba(78,154,241,0.2);
+      border-radius: 8px; padding: 10px 12px;
+      font-size: 0.73rem; color: var(--text2); line-height: 1.6;
+    }
+    .info-tip-box.open { display: block; }
+    .info-tip-box strong { color: var(--text); }
+
+    .input-wrap {
+      display: flex; align-items: center;
+      background: var(--bg3); border: 1px solid var(--border);
+      border-radius: 8px; overflow: hidden; transition: border-color 0.2s;
+    }
+    .input-wrap:focus-within { border-color: var(--orange); }
+    .input-wrap input {
+      background: transparent; border: none; color: var(--text);
+      font-size: 0.95rem; font-weight: 600;
+      padding: 9px 12px; flex: 1; min-width: 0; outline: none;
+    }
+    .input-wrap .unit {
+      padding: 9px 12px; font-size: 0.75rem; color: var(--text3);
+      background: rgba(255,255,255,0.03); border-left: 1px solid var(--border);
+      white-space: nowrap;
+    }
+
+    /* ── RESULT CARDS ── */
+    .results-grid {
+      display: grid; grid-template-columns: repeat(auto-fill, minmax(200px, 1fr));
+      gap: 16px; margin-bottom: 32px;
+    }
+    .result-card {
+      background: var(--bg2); border: 1px solid var(--border);
+      border-radius: var(--radius); padding: 18px 20px;
+      position: relative; overflow: hidden;
+    }
+    .result-card::before {
+      content:''; position: absolute; top:0; left:0; right:0; height:3px;
+      background: var(--orange);
+    }
+    .result-card.accent-green::before { background: var(--green); }
+    .result-card .label {
+      font-size: 0.72rem; color: var(--text2);
+      text-transform: uppercase; letter-spacing: 0.06em; margin-bottom: 8px;
+    }
+    .result-card .value { font-size: 1.6rem; font-weight: 800; line-height: 1; }
+    .result-card .value.orange { color: var(--orange); }
+    .result-card .value.green  { color: var(--green); }
+    .result-card .value.red    { color: var(--red); }
+    .result-card .sub { font-size: 0.72rem; color: var(--text3); margin-top: 5px; }
+
+    /* ── COMPARATIVA ── */
+    .compare-card {
+      background: var(--bg2); border: 1px solid var(--border);
+      border-radius: var(--radius); overflow: hidden; margin-bottom: 32px;
+    }
+    .compare-top {
+      padding: 18px 24px; border-bottom: 1px solid var(--border);
+      display: flex; align-items: center; justify-content: space-between;
+      flex-wrap: wrap; gap: 12px;
+    }
+    .compare-top h2 { font-size: 0.95rem; font-weight: 800; }
+    .compare-top h2 span { color: var(--orange); }
+    .compare-verdict {
+      padding: 5px 14px; border-radius: 20px;
+      font-size: 0.8rem; font-weight: 700; border: 1px solid;
+    }
+    .compare-verdict.solar-wins { background:rgba(0,208,132,0.12); color:var(--green); border-color:rgba(0,208,132,0.3); }
+    .compare-verdict.grid-wins  { background:rgba(255,69,96,0.12);  color:var(--red);   border-color:rgba(255,69,96,0.3); }
+    .compare-verdict.neutral    { background:rgba(247,147,26,0.1);  color:var(--orange); border-color:rgba(247,147,26,0.3); }
+
+    .compare-cols { display: grid; grid-template-columns: 1fr 1fr; }
+    @media (max-width: 640px) { .compare-cols { grid-template-columns: 1fr; } }
+    .compare-col { padding: 22px 24px; }
+    .compare-col + .compare-col { border-left: 1px solid var(--border); }
+    @media (max-width: 640px) {
+      .compare-col + .compare-col { border-left: none; border-top: 1px solid var(--border); }
+    }
+    .col-title {
+      font-size: 0.72rem; font-weight: 800;
+      text-transform: uppercase; letter-spacing: 0.1em;
+      margin-bottom: 16px; padding-bottom: 12px;
+      border-bottom: 2px solid; display: flex; align-items: center; gap: 8px;
+    }
+    .col-title.red-title   { color: var(--red);   border-color: var(--red); }
+    .col-title.green-title { color: var(--green); border-color: var(--green); }
+    .col-title .icon {
+      width: 26px; height: 26px; border-radius: 50%;
+      display: flex; align-items: center; justify-content: center; font-size: 13px;
+    }
+    .red-title   .icon { background: rgba(255,69,96,0.15); }
+    .green-title .icon { background: rgba(0,208,132,0.15); }
+    .cmp-row {
+      display: flex; justify-content: space-between; align-items: baseline;
+      padding: 9px 0; border-bottom: 1px solid rgba(255,255,255,0.04); gap: 8px;
+    }
+    .cmp-row:last-child { border-bottom: none; padding-bottom: 0; }
+    .cmp-row .clabel { font-size: 0.75rem; color: var(--text2); flex: 1; }
+    .cmp-row .cval   { font-size: 0.9rem; font-weight: 700; text-align: right; }
+    .cval.green  { color: var(--green); }
+    .cval.red    { color: var(--red); }
+    .cval.orange { color: var(--orange); }
+    .cval.dim    { color: var(--text3); font-weight: 400; font-size: 0.8rem; }
+
+    .compare-savings {
+      background: rgba(0,208,132,0.05); border-top: 1px solid rgba(0,208,132,0.15);
+      padding: 18px 24px;
+      display: grid; grid-template-columns: repeat(auto-fill, minmax(150px, 1fr)); gap: 16px;
+    }
+    .saving-item .slabel { font-size: 0.67rem; color: var(--text3); text-transform: uppercase; letter-spacing: 0.06em; margin-bottom: 4px; }
+    .saving-item .sval { font-size: 1.1rem; font-weight: 800; }
+    .saving-item .sval.green  { color: var(--green); }
+    .saving-item .sval.orange { color: var(--orange); }
+    .saving-item .ssub { font-size: 0.67rem; color: var(--text3); margin-top: 2px; }
+
+    /* ── CHARTS ── */
+    .charts-wrap {
+      display: grid; grid-template-columns: 2fr 1fr;
+      gap: 20px; margin-bottom: 32px;
+    }
+    @media (max-width: 800px) { .charts-wrap { grid-template-columns: 1fr; } }
+    .chart-card {
+      background: var(--bg2); border: 1px solid var(--border);
+      border-radius: var(--radius); padding: 24px;
+    }
+    .chart-card h3 {
+      font-size: 0.8rem; font-weight: 700; color: var(--text2);
+      margin-bottom: 20px; text-transform: uppercase; letter-spacing: 0.06em;
+    }
+
+    /* ── SIMULATION ── */
+    .sim-card {
+      background: var(--bg2); border: 1px solid var(--border);
+      border-top: 3px solid var(--orange);
+      border-radius: var(--radius); padding: 24px; margin-bottom: 32px;
+    }
+    .sim-header {
+      display: flex; align-items: center; gap: 16px; margin-bottom: 20px; flex-wrap: wrap;
+    }
+    .sim-header h3 { font-size: 0.8rem; font-weight: 700; color: var(--text2); text-transform: uppercase; letter-spacing: 0.06em; }
+    .sim-input-wrap { display: flex; align-items: center; gap: 12px; flex-wrap: wrap; }
+    .sim-input-wrap label { font-size: 0.85rem; color: var(--text2); }
+    .sim-big-input {
+      background: var(--bg3); border: 2px solid var(--orange);
+      border-radius: 10px; color: var(--orange);
+      font-size: 1.3rem; font-weight: 800;
+      padding: 10px 16px; width: 200px; outline: none; text-align: right;
+    }
+    .sim-results {
+      display: grid; grid-template-columns: repeat(auto-fill, minmax(200px, 1fr)); gap: 16px;
+    }
+
+    /* ── TABLE ── */
+    .table-card {
+      background: var(--bg2); border: 1px solid var(--border);
+      border-radius: var(--radius); overflow: hidden; margin-bottom: 32px;
+    }
+    .table-header {
+      padding: 16px 20px; border-bottom: 1px solid var(--border);
+      font-size: 0.8rem; font-weight: 700; color: var(--text2);
+      text-transform: uppercase; letter-spacing: 0.06em;
+      display: flex; justify-content: space-between; align-items: center;
+    }
+    .table-scroll { overflow-x: auto; }
+    table { width: 100%; border-collapse: collapse; font-size: 0.82rem; }
+    thead tr { background: rgba(247,147,26,0.08); }
+    thead th {
+      padding: 10px 16px; text-align: right; font-weight: 700; color: var(--text2);
+      font-size: 0.72rem; text-transform: uppercase; letter-spacing: 0.05em;
+      border-bottom: 1px solid var(--border);
+    }
+    thead th:first-child { text-align: center; }
+    tbody tr { border-bottom: 1px solid rgba(255,255,255,0.04); }
+    tbody tr:hover { background: rgba(255,255,255,0.03); }
+    tbody tr.halving-row { background: rgba(247,147,26,0.07) !important; }
+    tbody tr.halving-row td { border-top: 1px solid rgba(247,147,26,0.3); border-bottom: 1px solid rgba(247,147,26,0.3); }
+    tbody td { padding: 9px 16px; text-align: right; }
+    tbody td:first-child { text-align: center; color: var(--text2); font-weight: 700; }
+    .pos { color: var(--green); font-weight: 700; }
+    .neg { color: var(--red); }
+    .btc-val { color: var(--orange); font-size: 0.75rem; }
+    .halving-badge {
+      display: inline-block;
+      background: rgba(247,147,26,0.2); color: var(--orange);
+      border: 1px solid rgba(247,147,26,0.4);
+      border-radius: 10px; font-size: 0.62rem; font-weight: 700;
+      padding: 1px 6px; margin-left: 4px; vertical-align: middle;
+    }
+
+    /* ── BREAKDOWN ── */
+    .breakdown {
+      font-size: 0.78rem; color: var(--text3);
+      margin-top: 8px; padding-top: 8px;
+      border-top: 1px solid var(--border); line-height: 1.7;
+    }
+    .breakdown span { color: var(--text2); }
+
+    /* ── FOOTER ── */
+    footer {
+      text-align: center; padding: 24px;
+      color: var(--text3); font-size: 0.78rem;
+      border-top: 1px solid var(--border); margin-top: 20px;
+    }
+    footer a { color: var(--orange); text-decoration: none; }
+
+    /* ═══════════════════════════════════════════════════
+       WIZARD — BARRA DE PASOS HORIZONTAL
+    ═══════════════════════════════════════════════════ */
+    .wizard-step-bar {
+      display: flex; align-items: center;
+      background: var(--bg2); border: 1px solid var(--border);
+      border-radius: var(--radius); padding: 14px 22px;
+      margin-bottom: 20px; overflow-x: auto; gap: 0;
+      scrollbar-width: thin;
+    }
+    .ws-step {
+      display: flex; align-items: center; gap: 9px;
+      cursor: pointer; flex-shrink: 0; padding: 6px 10px;
+      border-radius: 8px; transition: background 0.2s;
+      text-decoration: none; color: inherit;
+    }
+    .ws-step:hover { background: rgba(247,147,26,0.07); }
+    .ws-circle {
+      width: 32px; height: 32px; border-radius: 50%; flex-shrink: 0;
+      display: flex; align-items: center; justify-content: center;
+      font-size: 0.82rem; font-weight: 800;
+      background: var(--bg3); border: 2px solid var(--border);
+      color: var(--text3); transition: all 0.2s;
+    }
+    .ws-step-info { display: flex; flex-direction: column; gap: 1px; }
+    .ws-step-label { font-size: 0.77rem; font-weight: 700; color: var(--text2); white-space: nowrap; transition: color 0.2s; }
+    .ws-step-sub   { font-size: 0.64rem; color: var(--text3); white-space: nowrap; }
+    .ws-line { flex: 1; min-width: 14px; height: 2px; background: var(--border); flex-shrink: 1; max-width: 50px; }
+    .ws-step.ws-active .ws-circle { background: var(--orange); border-color: var(--orange); color: white; box-shadow: 0 0 10px rgba(247,147,26,0.3); }
+    .ws-step.ws-active .ws-step-label { color: var(--orange); }
+    html.light .wizard-step-bar { box-shadow: 0 1px 4px var(--shadow); }
+
+    /* ═══════════════════════════════════════════════════
+       WIZARD — SECCIONES
+    ═══════════════════════════════════════════════════ */
+    .wizard-section {
+      background: var(--bg2); border: 1px solid var(--border);
+      border-radius: var(--radius); margin-bottom: 18px; overflow: hidden;
+    }
+    html.light .wizard-section { box-shadow: 0 1px 4px var(--shadow); }
+    .ws-head {
+      display: flex; align-items: flex-start; gap: 16px;
+      padding: 16px 22px; border-bottom: 1px solid var(--border);
+      background: linear-gradient(90deg, rgba(247,147,26,0.05) 0%, transparent 65%);
+    }
+    .ws-num-badge {
+      width: 38px; height: 38px; border-radius: 50%; flex-shrink: 0;
+      background: var(--orange); color: white;
+      display: flex; align-items: center; justify-content: center;
+      font-size: 0.95rem; font-weight: 900; margin-top: 2px;
+      box-shadow: 0 0 14px rgba(247,147,26,0.35);
+    }
+    .ws-title-block h2 { font-size: 0.95rem; font-weight: 800; margin-bottom: 3px; color: var(--text); }
+    .ws-title-block p  { font-size: 0.75rem; color: var(--text2); line-height: 1.55; }
+    .ws-body { padding: 18px 22px; }
+
+    /* ═══════════════════════════════════════════════════
+       TOGGLE BATERÍA
+    ═══════════════════════════════════════════════════ */
+    .bat-toggle-row {
+      display: flex; align-items: center; gap: 14px; flex-wrap: wrap;
+      background: var(--bg3); border: 1px solid var(--border);
+      border-radius: 10px; padding: 12px 16px; margin-bottom: 18px;
+    }
+    .bat-toggle-label { font-size: 0.85rem; font-weight: 700; color: var(--text); flex-shrink: 0; }
+    .bat-toggle-label em { font-style: normal; color: var(--text2); font-size: 0.74rem; font-weight: 400; margin-left: 6px; }
+
+    /* ═══════════════════════════════════════════════════
+       CAMPO DOBLE INLINE (W + €)
+    ═══════════════════════════════════════════════════ */
+    .field-pair {
+      display: grid; grid-template-columns: 1fr 1fr; gap: 10px; align-items: end;
+    }
+    @media (max-width: 480px) { .field-pair { grid-template-columns: 1fr; } }
+
+    /* ═══════════════════════════════════════════════════
+       TABS ANÁLISIS BÁSICO / AVANZADO
+    ═══════════════════════════════════════════════════ */
+    .analysis-tabs-bar {
+      display: grid; grid-template-columns: 1fr 1fr;
+      gap: 12px; margin: 28px 0 16px;
+    }
+    @media (max-width: 600px) { .analysis-tabs-bar { grid-template-columns: 1fr; } }
+    .atab {
+      background: var(--bg2); border: 2px solid var(--border);
+      border-radius: var(--radius); padding: 16px 20px;
+      cursor: pointer; text-align: left; transition: all 0.2s;
+      display: flex; align-items: flex-start; gap: 14px;
+    }
+    html.light .atab { box-shadow: 0 1px 4px var(--shadow); }
+    .atab-icon { font-size: 1.5rem; flex-shrink: 0; line-height: 1; }
+    .atab-title { font-size: 0.9rem; font-weight: 800; color: var(--text); margin-bottom: 4px; }
+    .atab-desc  { font-size: 0.73rem; color: var(--text3); line-height: 1.45; }
+    .atab:hover { border-color: var(--orange); }
+    .atab.active { border-color: var(--orange); background: rgba(247,147,26,0.05); }
+    .atab.active .atab-title { color: var(--orange); }
+
+    /* ═══════════════════════════════════════════════════
+       TARJETA INSTALACIÓN EXISTENTE
+    ═══════════════════════════════════════════════════ */
+    .existing-setup-card {
+      background: rgba(0,208,132,0.04); border: 1px solid rgba(0,208,132,0.25);
+      border-radius: 10px; padding: 18px 20px; margin-bottom: 16px;
+    }
+    .existing-setup-card .esc-title {
+      font-size: 0.78rem; font-weight: 700; color: var(--green);
+      text-transform: uppercase; letter-spacing: 0.08em;
+      margin-bottom: 14px; padding-bottom: 10px;
+      border-bottom: 1px solid rgba(0,208,132,0.2);
+    }
+    html.light .existing-setup-card { background: rgba(0,208,132,0.02); }
+  </style>
+</head>
+<body>
+
+<header>
+  <div class="logo">₿</div>
+  <div>
+    <h1>Calculadora Solar para <span>Minería Bitcoin</span> 24/7</h1>
+    <p>¿Es rentable minar con paneles solares y baterías? Descúbrelo con tus propios datos.</p>
+  </div>
+  <span class="badge" id="statusBadge">Calculando...</span>
+  <a href="https://dynamic-starship-cd670a.netlify.app" target="_blank" rel="noopener" class="theme-btn" style="text-decoration:none;">
+    <span class="theme-icon">🌐</span>
+    <span>Ver online</span>
+  </a>
+  <button class="theme-btn" onclick="toggleTheme()" id="themeBtn" title="Cambiar tema">
+    <span class="theme-icon" id="themeIcon">☀️</span>
+    <span id="themeLabel">Modo claro</span>
+  </button>
+</header>
+
+<main>
+
+  <!-- ════════════════════════════════════════════
+       GUÍA PASO A PASO (colapsable)
+  ════════════════════════════════════════════ -->
+  <div class="guide-banner">
+    <div class="guide-toggle" onclick="toggleGuide()">
+      <div class="guide-toggle-left">
+        <div class="icon">📖</div>
+        <div>
+          <h2>¿Cómo usar esta calculadora? — Guía paso a paso</h2>
+          <p>Aprende a obtener cada dato y entiende la lógica detrás de los cálculos</p>
+        </div>
+      </div>
+      <span class="guide-chevron" id="guideChevron">▼</span>
+    </div>
+
+    <div class="guide-body" id="guideBody">
+
+      <div class="guide-steps">
+
+        <div class="guide-step">
+          <div class="step-num">1</div>
+          <div class="step-content">
+            <h4>Consumo del minero (ASIC)</h4>
+            <p>
+              Ve a <a href="https://miningnow.com/" target="_blank" rel="noopener">MiningNow.com</a>, busca tu equipo y anota el consumo en vatios (W). Si tu ASIC tiene varios modos de funcionamiento, elige el modo que vas a usar (máximo rendimiento, eco, etc.). El consumo varía según el modo: a más rendimiento, más consumo.
+            </p>
+          </div>
+        </div>
+
+        <div class="guide-step">
+          <div class="step-num">2</div>
+          <div class="step-content">
+            <h4>Horas Solares Pico (HSP)</h4>
+            <p>
+              Las HSP son las horas efectivas de producción solar al día, calculadas como media anual (en verano hay más, en invierno menos). Ve a <a href="https://footprinthero.com/peak-sun-hours-calculator" target="_blank" rel="noopener">FootprintHero.com</a>, pon tu ciudad, selecciona el ángulo óptimo (<em>optimal tilt</em>) y copia el dato. Ejemplo: Colombia ≈ 4,11 h · España interior ≈ 5,5 h · Norte de España ≈ 3,5 h.
+            </p>
+          </div>
+        </div>
+
+        <div class="guide-step">
+          <div class="step-num">3</div>
+          <div class="step-content">
+            <h4>Paneles y baterías</h4>
+            <p>
+              Introduce la potencia de tu panel (p.ej. 590 W) y su coste. Para las baterías: si usas <strong>LiFePO4</strong> (litio-ferrofosfato), el porcentaje utilizable es el <strong>80%</strong> (de 20% a 100%). Si usas <strong>baterías de litio</strong> convencionales (como las de móvil), usa el <strong>60%</strong> (de 20% a 80%). Si no vas a instalar baterías, pon el coste a 0.
+            </p>
+          </div>
+        </div>
+
+        <div class="guide-step">
+          <div class="step-num">4</div>
+          <div class="step-content">
+            <h4>Producción diaria de BTC</h4>
+            <p>
+              Ve a <a href="https://miningnow.com/" target="_blank" rel="noopener">MiningNow.com</a>, busca tu equipo y mira el campo <strong>"Income/day"</strong> (ingresos brutos diarios en BTC). <strong>No uses "Profit/day"</strong> porque ese ya descuenta el coste eléctrico. Esta calculadora aplica el coste eléctrico por separado según tu situación real.
+            </p>
+          </div>
+        </div>
+
+        <div class="guide-step">
+          <div class="step-num">5</div>
+          <div class="step-content">
+            <h4>Tu tarifa eléctrica (punta / llano / valle)</h4>
+            <p>
+              Introduce los precios de tu factura por cada período. Usa los <strong>presets</strong> como punto de partida: <em>2.0TD España</em> (~0,22 / 0,14 / 0,05 €/kWh) o <em>Tarifa VE Iberdrola</em> (0,42 punta / 0,03 valle) — esta última es interesante si tienes batería grande, ya que desplazas todo el consumo a la noche (valle barato). La calculadora pondera automáticamente el precio medio para un consumo 24/7.
+            </p>
+          </div>
+        </div>
+
+        <div class="guide-step">
+          <div class="step-num">6</div>
+          <div class="step-content">
+            <h4>Precio de Bitcoin y simulación</h4>
+            <p>
+              Introduce el precio actual de BTC en euros para ver la rentabilidad de hoy. Luego usa la sección de <strong>simulación</strong> para ver qué pasaría si Bitcoin llega a tu precio objetivo. El ROI (retorno de inversión) te dice cuántos años tardarías en recuperar lo invertido a ese precio de BTC.
+            </p>
+          </div>
+        </div>
+
+      </div>
+
+      <!-- LÓGICA INTERNA -->
+      <div class="guide-logic">
+        <h3>¿Cómo calcula la tabla? — La lógica interna</h3>
+        <div class="logic-grid">
+
+          <div class="logic-item">
+            <div class="ltitle">Paneles necesarios</div>
+            <div class="ltext">
+              El minero consume <strong>las 24 h</strong>. Los paneles solo producen durante las horas pico. La calculadora divide el <strong>consumo diario total</strong> entre la <strong>producción por panel</strong> (vatios × HSP × eficiencia). Resultado: los paneles necesarios para cubrir todo el consumo y cargar las baterías.
+            </div>
+          </div>
+
+          <div class="logic-item">
+            <div class="ltitle">Baterías necesarias</div>
+            <div class="ltext">
+              Durante las horas sin sol (noche + horas no pico), el minero funciona con las baterías. La calculadora calcula cuántos kWh necesitas almacenar y lo divide entre la <strong>capacidad útil por batería</strong> (capacidad nominal × % utilizable). Ejemplo: batería de 15 kWh al 80% = 12 kWh útiles.
+            </div>
+          </div>
+
+          <div class="logic-item">
+            <div class="ltitle">Coste eléctrico con solar</div>
+            <div class="ltext">
+              <strong>Con batería:</strong> el coste eléctrico es <strong>0 €</strong> — los paneles alimentan el minero de día y cargan las baterías, que cubren la noche. No tiras de la red. <strong>Sin batería:</strong> solo cubres las horas de sol; por la noche sigues pagando a tu precio de red (valle/punta según franja horaria).
+            </div>
+          </div>
+
+          <div class="logic-item">
+            <div class="ltitle">Dificultad de la red (ajustable)</div>
+            <div class="ltext">
+              Cada vez hay más mineros conectados, lo que hace que cada equipo genere <strong>menos BTC</strong> con el tiempo. La calculadora aplica el porcentaje anual que configures mes a mes. Históricamente ha subido ~51% al año, aunque varía mucho según el ciclo del mercado. Es por eso que la ganancia va bajando progresivamente aunque el precio de BTC no cambie.
+            </div>
+          </div>
+
+          <div class="logic-item">
+            <div class="ltitle">Halving de Bitcoin</div>
+            <div class="ltext">
+              Cada ~4 años, la recompensa por bloque se <strong>reduce a la mitad</strong>, lo que significa que tu equipo generará la mitad de BTC de golpe. Introduce la fecha del próximo halving en el campo de configuración avanzada. La tabla lo marca con una fila especial y aplica el ×0,5 automáticamente en ese mes.
+            </div>
+          </div>
+
+          <div class="logic-item">
+            <div class="ltitle">Amortización de la instalación solar</div>
+            <div class="ltext">
+              La solar se amortiza con el <strong>ahorro en electricidad</strong> que genera: coste solar ÷ (consumo diario × precio kWh × 365). Independientemente del precio de BTC, la solar te ahorra dinero en luz todos los días. Eso es lo que hace que la inversión solar sea más estable.
+            </div>
+          </div>
+
+        </div>
+      </div>
+
+    </div>
+  </div>
+
+  <!-- ════════════════════════════════════════════
+       BARRA DE PASOS HORIZONTAL
+  ════════════════════════════════════════════ -->
+  <div class="wizard-step-bar">
+    <a class="ws-step ws-active" href="#ws1">
+      <div class="ws-circle">1</div>
+      <div class="ws-step-info">
+        <span class="ws-step-label">Punto de partida</span>
+        <span class="ws-step-sub">¿Tienes solar?</span>
+      </div>
+    </a>
+    <div class="ws-line"></div>
+    <a class="ws-step" href="#ws2">
+      <div class="ws-circle">2</div>
+      <div class="ws-step-info">
+        <span class="ws-step-label">Tu minero</span>
+        <span class="ws-step-sub">ASIC y rentabilidad</span>
+      </div>
+    </a>
+    <div class="ws-line"></div>
+    <a class="ws-step" href="#ws3">
+      <div class="ws-circle">3</div>
+      <div class="ws-step-info">
+        <span class="ws-step-label">Instalación solar</span>
+        <span class="ws-step-sub">Paneles y batería</span>
+      </div>
+    </a>
+    <div class="ws-line"></div>
+    <a class="ws-step" href="#ws4">
+      <div class="ws-circle">4</div>
+      <div class="ws-step-info">
+        <span class="ws-step-label">Tarifa eléctrica</span>
+        <span class="ws-step-sub">Precio del kWh</span>
+      </div>
+    </a>
+    <div class="ws-line"></div>
+    <a class="ws-step" href="#ws5">
+      <div class="ws-circle">5</div>
+      <div class="ws-step-info">
+        <span class="ws-step-label">Config. avanzada</span>
+        <span class="ws-step-sub">Dificultad y halvings</span>
+      </div>
+    </a>
+  </div>
+
+  <!-- ════════════════════════════════════════════
+       PASO 1 — ¿TIENES INSTALACIÓN SOLAR?
+  ════════════════════════════════════════════ -->
+  <div class="wizard-section" id="ws1">
+    <div class="ws-head">
+      <div class="ws-num-badge">1</div>
+      <div class="ws-title-block">
+        <h2>Punto de partida</h2>
+        <p>¿Ya tienes paneles instalados o partes desde cero? La calculadora adapta todos los resultados según tu situación.</p>
+      </div>
+    </div>
+    <div class="ws-body">
+      <div class="mode-selector" style="background:transparent;border:none;padding:0;margin:0;">
+        <div class="mode-selector-label">¿Tienes instalación solar? <span>Elige tu punto de partida</span></div>
+        <div class="mode-pills">
+          <button class="mode-pill active" id="modeNew" onclick="setMode('new')">🏗️ No tengo — calcular instalación nueva</button>
+          <button class="mode-pill" id="modeExisting" onclick="setMode('existing')">⚡ Sí tengo — calcular lo que me falta</button>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- ════════════════════════════════════════════
+       PASO 2 — TU MINERO (+ instalación existente si aplica)
+  ════════════════════════════════════════════ -->
+  <div class="wizard-section" id="ws2">
+    <div class="ws-head">
+      <div class="ws-num-badge">2</div>
+      <div class="ws-title-block">
+        <h2 id="ws2-title">Tu equipo de minería</h2>
+        <p id="ws2-desc">Introduce los datos de tu ASIC: cuánto consume, cuánto Bitcoin genera al día y cuánto vale. Con esto calculamos la rentabilidad actual.</p>
+      </div>
+    </div>
+    <div class="ws-body">
+
+      <!-- Instalación existente (visible solo en modo "ya tengo solar") -->
+      <div class="existing-setup-card" id="existingCard" style="display:none;">
+        <div class="esc-title">☀️ Tu instalación solar actual — lo que ya tienes</div>
+        <div class="inputs-grid" style="margin-bottom:0;">
+          <div class="input-card" style="background:transparent;border:none;padding:0;">
+            <div class="field">
+              <label>Paneles solares que ya tienes
+                <span class="hint">Número de paneles actualmente instalados en tu sistema</span>
+              </label>
+              <div class="input-wrap" style="border-color:rgba(0,208,132,0.4);">
+                <input type="number" id="panelesExistentes" value="0" min="0" step="1">
+                <span class="unit">paneles</span>
+              </div>
+            </div>
+            <div class="field">
+              <label>Potencia de tus paneles actuales
+                <span class="hint">W por panel de tu instalación ya instalada</span>
+              </label>
+              <div class="input-wrap">
+                <input type="number" id="panelWExistente" value="590" min="1" step="1">
+                <span class="unit">W/panel</span>
+              </div>
+            </div>
+          </div>
+          <div class="input-card" style="background:transparent;border:none;padding:0;">
+            <div class="field">
+              <label>Baterías que ya tienes
+                <span class="hint">Número de baterías instaladas actualmente</span>
+              </label>
+              <div class="input-wrap" style="border-color:rgba(0,208,132,0.4);">
+                <input type="number" id="bateriasExistentes" value="0" min="0" step="1" oninput="toggleCapBatExist()">
+                <span class="unit">baterías</span>
+              </div>
+            </div>
+            <div class="field" id="capBatExistField" style="display:none;">
+              <label>Capacidad de cada batería existente
+                <span class="hint">kWh nominales por batería instalada (ej: LiFePO4 15 kWh)</span>
+              </label>
+              <div class="input-wrap" style="border-color:rgba(0,208,132,0.4);">
+                <input type="number" id="capBatExistente" value="15" min="1" step="0.5">
+                <span class="unit">kWh/bat</span>
+              </div>
+            </div>
+            <div class="field">
+              <label>Consumo anual de la vivienda
+                <span class="hint">kWh/año de tu casa <strong>sin contar el minero</strong>. Está en tu factura eléctrica anual. Hogar medio España ≈ <strong>3.500 kWh/año</strong>.</span>
+              </label>
+              <div class="input-wrap" style="border-color:rgba(0,208,132,0.4);">
+                <input type="number" id="consumoHogar" value="0" min="0" step="10">
+                <span class="unit">kWh/año</span>
+              </div>
+              <button class="info-tip-toggle" onclick="toggleTip('tip_hogar')">ℹ️ ¿Dónde lo encuentro?</button>
+              <div class="info-tip-box" id="tip_hogar">
+                En tu <strong>factura eléctrica anual</strong> aparece el consumo total en kWh. En España un hogar medio consume entre <strong>3.000 y 4.500 kWh/año</strong>. Si solo tienes el dato mensual, multiplícalo por 12.
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <!-- Datos del minero -->
+      <div class="inputs-grid" style="margin-bottom:0;">
+        <div class="input-card">
+          <h3>Tu equipo ASIC</h3>
+          <div class="field">
+            <label>Número de mineros (ASICs)
+              <span class="hint">¿Cuántos equipos iguales tienes? El consumo, BTC generado y coste se multiplican automáticamente.</span>
+            </label>
+            <div class="input-wrap" style="border-color:var(--orange);">
+              <input type="number" id="numMineros" value="1" min="1" max="999" step="1" style="color:var(--orange);font-size:1.1rem;">
+              <span class="unit">minero(s)</span>
+            </div>
+          </div>
+          <div class="field">
+            <label>Consumo del minero (ASIC) <em style="font-size:0.68rem;color:var(--text3);">— por unidad</em>
+              <span class="hint">Vatios que consume cada equipo encendido.<br>
+                <a class="ref-link" href="https://miningnow.com/" target="_blank" rel="noopener">↗ Búscalo en MiningNow.com</a>
+              </span>
+            </label>
+            <div class="input-wrap">
+              <input type="number" id="asicW" value="1654" min="1" step="1">
+              <span class="unit">W</span>
+            </div>
+            <button class="info-tip-toggle" onclick="toggleTip('tip_asic')">ℹ️ ¿Cómo lo busco?</button>
+            <div class="info-tip-box" id="tip_asic">
+              Entra en <strong>MiningNow.com</strong>, busca el nombre de tu ASIC (ej: "Antminer S21"). Verás el consumo en W para cada modo. A más vatios, más BTC genera pero más consume.
+            </div>
+          </div>
+          <div class="field">
+            <label>Coste del minero (ASIC) <em style="font-size:0.68rem;color:var(--text3);">— por unidad</em>
+              <span class="hint">Precio de compra de <strong>cada equipo</strong>. Se multiplica por el nº de mineros.</span>
+            </label>
+            <div class="input-wrap">
+              <input type="number" id="costMinero" value="1639" min="0" step="1">
+              <span class="unit">€</span>
+            </div>
+          </div>
+        </div>
+        <div class="input-card">
+          <h3>Producción &amp; Precio BTC</h3>
+          <div class="field">
+            <label>Producción diaria de BTC <em style="font-size:0.68rem;color:var(--text3);">— por unidad</em>
+              <span class="hint">BTC que genera <strong>cada equipo</strong> al día (bruto, sin descontar luz).<br>
+                <a class="ref-link" href="https://miningnow.com/" target="_blank" rel="noopener">↗ Campo "Income/day" en MiningNow.com</a>
+              </span>
+            </label>
+            <div class="input-wrap">
+              <input type="number" id="btcDiario" value="0.00004416" min="0.000000001" step="0.000001">
+              <span class="unit">BTC/día</span>
+            </div>
+            <button class="info-tip-toggle" onclick="toggleTip('tip_btc')">ℹ️ Income vs Profit, ¿cuál uso?</button>
+            <div class="info-tip-box" id="tip_btc">
+              Usa siempre el <strong>Income/day</strong> (ingresos brutos). El Profit ya descuenta el coste eléctrico — si lo usaras, estarías restando el coste dos veces.
+            </div>
+          </div>
+          <div class="field">
+            <label>Precio actual del Bitcoin
+              <span class="hint" id="btcPriceStatus" style="display:flex;align-items:center;gap:6px;margin-top:3px;">
+                <span id="btcStatusDot" style="width:7px;height:7px;border-radius:50%;background:var(--text3);flex-shrink:0;display:inline-block;"></span>
+                <span id="btcStatusMsg">Cargando precio...</span>
+              </span>
+            </label>
+            <div class="input-wrap" id="btcPriceWrap">
+              <input type="number" id="precioBTC" value="" min="1" step="1" placeholder="Obteniendo...">
+              <button onclick="fetchBTCPrice()" title="Actualizar precio" style="background:none;border:none;border-left:1px solid var(--border);padding:0 12px;cursor:pointer;color:var(--orange);font-size:1rem;height:100%;" id="btcRefreshBtn">↻</button>
+              <span class="unit">€</span>
+            </div>
+          </div>
+        </div>
+      </div>
+
+    </div>
+  </div>
+
+  <!-- ════════════════════════════════════════════
+       PASO 3 — INSTALACIÓN SOLAR
+  ════════════════════════════════════════════ -->
+  <div class="wizard-section" id="ws3">
+    <div class="ws-head">
+      <div class="ws-num-badge">3</div>
+      <div class="ws-title-block">
+        <h2>Instalación solar</h2>
+        <p>Define los paneles que vas a instalar. Elige si quieres incluir batería en el cálculo — si no la quieres, la calculadora no te dirá cuántas necesitas ni la incluirá en el coste.</p>
+      </div>
+    </div>
+    <div class="ws-body">
+
+      <!-- Toggle batería -->
+      <div class="bat-toggle-row">
+        <span class="bat-toggle-label">¿Incluir batería en el cálculo? <em>Si no quieres batería, solo se calculará con paneles solares</em></span>
+        <div class="mode-pills">
+          <button class="mode-pill" id="batIncluida_yes" onclick="toggleBateriaIncluida(true)">🔋 Sí, quiero batería</button>
+          <button class="mode-pill active" id="batIncluida_no" onclick="toggleBateriaIncluida(false)">☀️ No, solo paneles</button>
+        </div>
+      </div>
+
+      <div class="inputs-grid" style="margin-bottom:0;">
+        <!-- Paneles -->
+        <div class="input-card">
+          <h3>Paneles solares</h3>
+          <div class="field">
+            <label>Potencia y precio del panel <em style="font-size:0.68rem;color:var(--text3);">— introduce ambos datos del mismo modelo de panel</em></label>
+            <div class="field-pair">
+              <div>
+                <label style="font-size:0.72rem;color:var(--text3);margin-bottom:4px;">Potencia</label>
+                <div class="input-wrap">
+                  <input type="number" id="panelW" value="590" min="1" step="1">
+                  <span class="unit">W/panel</span>
+                </div>
+              </div>
+              <div>
+                <label style="font-size:0.72rem;color:var(--text3);margin-bottom:4px;">Precio</label>
+                <div class="input-wrap">
+                  <input type="number" id="costPanel" value="112.06" min="0" step="0.01">
+                  <span class="unit">€/panel</span>
+                </div>
+              </div>
+            </div>
+          </div>
+          <div class="field">
+            <label>Horas Solares Pico (HSP)
+              <span class="hint">Media anual de horas efectivas de producción solar por día. Depende de tu ubicación geográfica.<br>
+                <a class="ref-link" href="https://footprinthero.com/peak-sun-hours-calculator" target="_blank" rel="noopener">↗ Calcula las HSP de tu zona en FootprintHero.com</a>
+              </span>
+            </label>
+            <div class="input-wrap">
+              <input type="number" id="hsp" value="4.11" min="0.1" step="0.01" max="12">
+              <span class="unit">h/día</span>
+            </div>
+            <button class="info-tip-toggle" onclick="toggleTip('tip_hsp')">ℹ️ Ejemplos de HSP por ciudad</button>
+            <div class="info-tip-box" id="tip_hsp">
+              🇪🇸 Badajoz ≈ <strong>5,85 h</strong> · Madrid ≈ <strong>5,2 h</strong> · Barcelona ≈ <strong>4,8 h</strong> · Galicia ≈ <strong>3,5 h</strong><br>
+              🇨🇴 Bogotá ≈ <strong>4,11 h</strong> · Medellín ≈ <strong>4,5 h</strong> · Cali ≈ <strong>4,8 h</strong><br>
+              🇲🇽 Ciudad de México ≈ <strong>5,5 h</strong> · Monterrey ≈ <strong>5,8 h</strong> · Guadalajara ≈ <strong>5,6 h</strong><br>
+              🇦🇷 Buenos Aires ≈ <strong>4,5 h</strong> · Mendoza ≈ <strong>5,9 h</strong><br>
+              🇨🇱 Santiago ≈ <strong>5,2 h</strong> · Atacama ≈ <strong>7,5 h</strong> (zona solar excepcional)
+            </div>
+          </div>
+          <div class="field">
+            <label>Eficiencia solar
+              <span class="hint">Factor de pérdidas del sistema (cables, inversor, temperatura…). <strong>0,86</strong> es un valor habitual. Rango: 0,75 – 0,90.</span>
+            </label>
+            <div class="input-wrap">
+              <input type="number" id="eficiencia" value="0.86" min="0.5" max="1" step="0.01">
+              <span class="unit">factor</span>
+            </div>
+          </div>
+          <div class="field">
+            <label>Inversor, cableado y extras
+              <span class="hint">Inversor, cables, soportes, mano de obra… Mínimo 2.000-4.000 € para instalaciones pequeñas.</span>
+            </label>
+            <div class="input-wrap">
+              <input type="number" id="costExtras" value="4000" min="0" step="1">
+              <span class="unit">€</span>
+            </div>
+          </div>
+        </div>
+
+        <!-- Batería (se oculta si no se quiere batería) -->
+        <div class="input-card" id="batFields" style="display:none;">
+          <h3>Batería</h3>
+          <div class="field">
+            <label>Capacidad y precio de la batería <em style="font-size:0.68rem;color:var(--text3);">— introduce ambos datos del mismo modelo</em></label>
+            <div class="field-pair">
+              <div>
+                <label style="font-size:0.72rem;color:var(--text3);margin-bottom:4px;">Capacidad</label>
+                <div class="input-wrap">
+                  <input type="number" id="capBateria" value="15" min="0.1" step="0.1">
+                  <span class="unit">kWh/bat</span>
+                </div>
+              </div>
+              <div>
+                <label style="font-size:0.72rem;color:var(--text3);margin-bottom:4px;">Precio</label>
+                <div class="input-wrap">
+                  <input type="number" id="costBateria" value="0" min="0" step="0.01">
+                  <span class="unit">€/bat</span>
+                </div>
+              </div>
+            </div>
+          </div>
+          <div class="field">
+            <label>% Utilizable de la batería
+              <span class="hint">LiFePO4 (más comunes en solar): <strong>80%</strong> · Litio convencional: <strong>60%</strong></span>
+            </label>
+            <div class="input-wrap">
+              <input type="number" id="pctBateria" value="80" min="1" max="100" step="1">
+              <span class="unit">%</span>
+            </div>
+            <button class="info-tip-toggle" onclick="toggleTip('tip_bat')">ℹ️ ¿Por qué no el 100%?</button>
+            <div class="info-tip-box" id="tip_bat">
+              Nunca debes descargar una batería al 0% ni cargarla continuamente al máximo — se degrada antes. Las <strong>LiFePO4</strong> se usan del 20% al 100% → <strong>80% utilizable</strong>. Las de <strong>litio convencional</strong> del 20% al 80% → <strong>60% utilizable</strong>.
+            </div>
+          </div>
+          <div class="field">
+            <label>Ciclos útiles de la batería
+              <span class="hint">Nº de cargas completas antes de degradarse. LiFePO4: <strong>6.000</strong> ciclos ≈ <strong>16 años</strong> a 1 ciclo/día.</span>
+            </label>
+            <div class="input-wrap">
+              <input type="number" id="ciclosBat" value="6000" min="500" max="20000" step="100">
+              <span class="unit">ciclos</span>
+            </div>
+            <button class="info-tip-toggle" onclick="toggleTip('tip_ciclos')">ℹ️ ¿Qué son los ciclos?</button>
+            <div class="info-tip-box" id="tip_ciclos">
+              Un ciclo = una carga completa + descarga completa. Las <strong>LiFePO4</strong> garantizan entre 4.000 y 6.000 ciclos. A 1 ciclo/día, 6.000 ciclos = <strong>~16,4 años de vida útil</strong>.
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- ════════════════════════════════════════════
+       PASO 4 — TARIFA ELÉCTRICA
+  ════════════════════════════════════════════ -->
+  <div class="wizard-section" id="ws4">
+    <div class="ws-head">
+      <div class="ws-num-badge">4</div>
+      <div class="ws-title-block">
+        <h2>Tarifa eléctrica</h2>
+        <p>¿Cuánto pagas por el kWh? Usa los presets como punto de partida o introduce los precios exactos de tu factura. La calculadora ponderará el precio para un consumo continuo 24/7.</p>
+      </div>
+    </div>
+    <div class="ws-body">
+      <div class="inputs-grid" style="margin-bottom:0;">
+        <div class="input-card">
+          <h3>Precios por período</h3>
+          <div class="field">
+            <label>Preset de tarifa <span class="hint">Selecciona el que más se parezca a tu contrato, o elige Manual para introducir tus valores</span></label>
+            <div class="tarifa-presets">
+              <button class="tarifa-preset-btn" id="preset_manual" onclick="applyTarifa('manual')">Manual</button>
+              <button class="tarifa-preset-btn active" id="preset_2td" onclick="applyTarifa('2td')">2.0TD España</button>
+              <button class="tarifa-preset-btn" id="preset_ve" onclick="applyTarifa('ve')">Tarifa VE (Iberdrola)</button>
+            </div>
+          </div>
+          <div class="field" style="margin-bottom:10px;">
+            <label style="font-size:0.72rem;">🔴 Punta (P1) <span style="color:var(--text3);font-weight:400;">lun-vie: 10-14h y 18-22h</span></label>
+            <div class="input-wrap">
+              <input type="number" id="precioPunta" value="0.22" min="0" step="0.001">
+              <span class="unit">€/kWh</span>
+            </div>
+          </div>
+          <div class="field" style="margin-bottom:10px;">
+            <label style="font-size:0.72rem;">🟡 Llano (P2) <span style="color:var(--text3);font-weight:400;">lun-vie: 8-10h, 14-18h, 22-24h</span></label>
+            <div class="input-wrap">
+              <input type="number" id="precioLlano" value="0.14" min="0" step="0.001">
+              <span class="unit">€/kWh</span>
+            </div>
+          </div>
+          <div class="field" style="margin-bottom:8px;">
+            <label style="font-size:0.72rem;">🟢 Valle (P3) <span style="color:var(--text3);font-weight:400;">noches (0-8h) y fines de semana</span></label>
+            <div class="input-wrap">
+              <input type="number" id="precioValle" value="0.05" min="0" step="0.001">
+              <span class="unit">€/kWh</span>
+            </div>
+          </div>
+          <div class="tarifa-media-row">
+            <span class="tarifa-media-lbl">Precio medio ponderado (24/7):</span>
+            <span class="tarifa-media-val" id="precioElecCalc">— €/kWh</span>
+          </div>
+          <button class="info-tip-toggle" onclick="toggleTip('tip_elec')">ℹ️ ¿Cómo leo mi tarifa?</button>
+          <div class="info-tip-box" id="tip_elec">
+            En tu <strong>factura eléctrica</strong> verás el precio del kWh por período. La <strong>2.0TD</strong> (la más común en España) tiene punta ~0,22 €, llano ~0,14 € y valle ~0,05 €. La <strong>tarifa VE</strong> de Iberdrola solo tiene punta (0,42 €) y valle (0,03 €) — ideal si tienes batería grande.
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- ════════════════════════════════════════════
+       PASO 5 — CONFIGURACIÓN AVANZADA
+  ════════════════════════════════════════════ -->
+  <div class="wizard-section" id="ws5">
+    <div class="ws-head">
+      <div class="ws-num-badge">5</div>
+      <div class="ws-title-block">
+        <h2>Configuración avanzada</h2>
+        <p>Parámetros para la proyección a futuro: dificultad de red, meses y próximo halving. Los valores por defecto son razonables — solo tócalos si sabes lo que haces.</p>
+      </div>
+    </div>
+    <div class="ws-body">
+      <div class="inputs-grid" style="margin-bottom:0;">
+        <div class="input-card">
+          <h3>Proyección a futuro</h3>
+          <div class="field">
+            <label>Crecimiento anual de la dificultad
+              <span class="hint">Histórico: ~51% anual. Ajústalo según tus expectativas. A mayor dificultad, menos BTC genera tu equipo con el tiempo.</span>
+            </label>
+            <div class="input-wrap">
+              <input type="number" id="dificultad" value="51.86" min="0" max="500" step="0.01">
+              <span class="unit">% / año</span>
+            </div>
+            <button class="info-tip-toggle" onclick="toggleTip('tip_dific')">ℹ️ ¿Qué es la dificultad?</button>
+            <div class="info-tip-box" id="tip_dific">
+              Cuantos más mineros se conectan a la red Bitcoin, más difícil es minar y <strong>menos BTC genera cada equipo</strong>. Históricamente la dificultad ha subido ~51% al año. Es por eso que en la proyección verás cómo la ganancia mensual va bajando poco a poco.
+            </div>
+          </div>
+          <div class="field">
+            <label>Meses a proyectar</label>
+            <div class="input-wrap">
+              <input type="number" id="mesesProyeccion" value="36" min="3" max="120" step="1">
+              <span class="unit">meses</span>
+            </div>
+          </div>
+          <div class="field">
+            <label>Próximo Halving Bitcoin
+              <span class="hint">Cada ~4 años el BTC generado por los mineros se reduce a la mitad. La calculadora lo aplica automáticamente.</span>
+            </label>
+            <div class="input-wrap">
+              <input type="text" id="halvingDate" value="2028-04-23" style="font-size:0.88rem">
+              <span class="unit">fecha</span>
+            </div>
+            <button class="info-tip-toggle" onclick="toggleTip('tip_halving')">ℹ️ ¿Qué es el halving?</button>
+            <div class="info-tip-box" id="tip_halving">
+              El halving ocurre cada ~4 años. Cuando sucede, la recompensa a los mineros se <strong>reduce a la mitad</strong>: de un día para otro tu equipo generará la mitad de BTC. La tabla lo marcará en naranja con "HALVING ×0.5".
+            </div>
+          </div>
+        </div>
+        <div class="input-card">
+          <h3>Resumen de tu configuración</h3>
+          <div class="breakdown" id="calcBreakdown" style="border:none;padding:0;margin:0;font-size:0.8rem;line-height:1.9;">
+            Introduce los datos para ver el desglose.
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- ════════════════════════════════════════════
+       SISTEMA SOLAR NECESARIO
+  ════════════════════════════════════════════ -->
+  <p class="section-title" id="solarNecesarioTitle">Sistema solar necesario</p>
+  <div class="results-grid">
+    <div class="result-card">
+      <div class="label" id="r_consumoDiario_lbl">Consumo diario total</div>
+      <div class="value orange" id="r_consumoDiario">-</div>
+      <div class="sub" id="r_consumoDiario_sub">kWh/día (24 h continuo)</div>
+    </div>
+    <div class="result-card">
+      <div class="label">Cubierto por solar (día)</div>
+      <div class="value orange" id="r_consumoDia">-</div>
+      <div class="sub" id="r_consumoDia_sub">kWh durante las horas de sol</div>
+    </div>
+    <div class="result-card" id="r_card_noche">
+      <div class="label" id="r_consumoNoche_lbl">Consumo nocturno</div>
+      <div class="value orange" id="r_consumoNoche">-</div>
+      <div class="sub" id="r_consumoNoche_sub">kWh que consumes cuando no hay sol</div>
+    </div>
+    <div class="result-card">
+      <div class="label" id="r_paneles_lbl">Paneles necesarios</div>
+      <div class="value orange" id="r_paneles">-</div>
+      <div class="sub" id="r_paneles_sub">unidades</div>
+    </div>
+    <div class="result-card" id="r_card_baterias" style="display:none;">
+      <div class="label" id="r_baterias_lbl">Baterías necesarias</div>
+      <div class="value orange" id="r_baterias">-</div>
+      <div class="sub" id="r_baterias_sub">unidades</div>
+    </div>
+    <div class="result-card">
+      <div class="label" id="r_costoSolar_lbl">Coste instalación solar</div>
+      <div class="value orange" id="r_costoSolar">-</div>
+      <div class="sub" id="r_costoSolar_sub">€ (paneles + baterías + extras)</div>
+    </div>
+  </div>
+
+  <!-- ════════════════════════════════════════════
+       DESGLOSE TARIFARIO
+  ════════════════════════════════════════════ -->
+  <div class="tarifa-breakdown" id="tarifaBreakdownSection">
+    <div class="tarifa-breakdown-header">⚡ Coste eléctrico del minero por período tarifario</div>
+    <table>
+      <thead>
+        <tr>
+          <th>Período</th>
+          <th>Horas/semana</th>
+          <th>% del tiempo</th>
+          <th>Precio (€/kWh)</th>
+          <th>kWh/año (minero)</th>
+          <th>Coste/año</th>
+        </tr>
+      </thead>
+      <tbody>
+        <tr>
+          <td>🔴 Punta (P1)</td>
+          <td id="td_h_punta">40 h</td>
+          <td id="td_pct_punta">23,8%</td>
+          <td id="td_precio_punta">—</td>
+          <td id="td_kwh_punta">—</td>
+          <td id="td_cost_punta">—</td>
+        </tr>
+        <tr>
+          <td>🟡 Llano (P2)</td>
+          <td id="td_h_llano">40 h</td>
+          <td id="td_pct_llano">23,8%</td>
+          <td id="td_precio_llano">—</td>
+          <td id="td_kwh_llano">—</td>
+          <td id="td_cost_llano">—</td>
+        </tr>
+        <tr>
+          <td>🟢 Valle (P3)</td>
+          <td id="td_h_valle">88 h</td>
+          <td id="td_pct_valle">52,4%</td>
+          <td id="td_precio_valle">—</td>
+          <td id="td_kwh_valle">—</td>
+          <td id="td_cost_valle">—</td>
+        </tr>
+        <tr class="tarifa-total">
+          <td>Total</td>
+          <td>168 h</td>
+          <td>100%</td>
+          <td id="td_precio_media">—</td>
+          <td id="td_kwh_total">—</td>
+          <td id="td_cost_total">—</td>
+        </tr>
+      </tbody>
+    </table>
+  </div>
+
+  <!-- ════════════════════════════════════════════
+       AMPLIACIÓN — LO QUE YA TIENES / LO QUE TE FALTA
+  ════════════════════════════════════════════ -->
+  <div class="ampliacion-section" id="ampliacionSection" style="display:none;">
+    <p class="section-title">Análisis de tu instalación actual</p>
+    <div class="ampliacion-grid">
+
+      <div class="amp-card">
+        <h4 class="h-green">☀️ Lo que ya tienes</h4>
+        <div class="amp-row">
+          <span class="amp-lbl">Producción actual / día</span>
+          <span class="amp-val orange" id="amp_prodActualDia">-</span>
+        </div>
+        <div class="amp-row">
+          <span class="amp-lbl">Capacidad batería actual (útil)</span>
+          <span class="amp-val" id="amp_capBatActual">-</span>
+        </div>
+        <div class="amp-row">
+          <span class="amp-lbl">Consumo minero / día</span>
+          <span class="amp-val" id="amp_consumoMinero">-</span>
+        </div>
+        <div class="amp-row">
+          <span class="amp-lbl">Consumo vivienda</span>
+          <span class="amp-val" id="amp_consumoHogar">-</span>
+        </div>
+        <div class="amp-row">
+          <span class="amp-lbl">Consumo total / día</span>
+          <span class="amp-val orange" id="amp_consumoTotal">-</span>
+        </div>
+        <div class="amp-row">
+          <span class="amp-lbl">¿Tu producción actual es suficiente?</span>
+          <span class="amp-val" id="amp_suficiente">-</span>
+        </div>
+      </div>
+
+      <div class="amp-card">
+        <h4 class="h-orange">🔧 Lo que necesitas añadir</h4>
+        <div class="amp-row">
+          <span class="amp-lbl">Paneles adicionales</span>
+          <span class="amp-val orange" id="amp_panelesAdicionales">-</span>
+        </div>
+        <div class="amp-row">
+          <span class="amp-lbl">Baterías adicionales</span>
+          <span class="amp-val orange" id="amp_bateriasAdicionales">-</span>
+        </div>
+        <div class="amp-row">
+          <span class="amp-lbl">Coste de la ampliación</span>
+          <span class="amp-val orange" id="amp_costoAmpliacion">-</span>
+        </div>
+        <div class="amp-row">
+          <span class="amp-lbl">Coste total (existente + ampliación)</span>
+          <span class="amp-val" id="amp_costoTotal">-</span>
+        </div>
+        <div class="amp-row">
+          <span class="amp-lbl">ROI ampliación (solo minero)</span>
+          <span class="amp-val orange" id="amp_roi">-</span>
+        </div>
+      </div>
+
+    </div>
+  </div>
+
+  <!-- ════════════════════════════════════════════
+       TABS ANÁLISIS BÁSICO / AVANZADO
+  ════════════════════════════════════════════ -->
+  <div class="analysis-tabs-bar">
+    <button class="atab active" id="atab_basic" onclick="setAnalysisMode('basic')">
+      <span class="atab-icon">📊</span>
+      <div class="atab-text">
+        <div class="atab-title">Análisis básico</div>
+        <div class="atab-desc">¿Vale la pena la solar? Comparativa directa, rentabilidad actual y simulación con tu precio objetivo de Bitcoin.</div>
+      </div>
+    </button>
+    <button class="atab" id="atab_advanced" onclick="setAnalysisMode('advanced')">
+      <span class="atab-icon">🔬</span>
+      <div class="atab-text">
+        <div class="atab-title">Análisis avanzado</div>
+        <div class="atab-desc">ROI de la batería, tabla año a año, sensibilidad de precios, proyección mensual con dificultad y halvings.</div>
+      </div>
+    </button>
+  </div>
+
+  <!-- ════ ANÁLISIS BÁSICO ════ -->
+  <div id="analysis_basic">
+
+  <!-- ════════════════════════════════════════════
+       COMPARATIVA
+  ════════════════════════════════════════════ -->
+  <p class="section-title">Comparativa: con solar vs sin solar</p>
+
+  <div class="compare-card">
+    <div class="compare-top">
+      <h2>¿Vale la pena instalar los paneles? <span>Ve la diferencia de un vistazo</span></h2>
+      <span class="compare-verdict" id="cmp_verdict">Calculando...</span>
+    </div>
+    <div class="compare-cols">
+      <div class="compare-col">
+        <div class="col-title red-title">
+          <span class="icon">⚡</span>
+          Sin solar — pagas toda la electricidad
+        </div>
+        <div class="cmp-row"><span class="clabel">Coste eléctrico / día</span><span class="cval red" id="cmp_sin_costoElec">-</span></div>
+        <div class="cmp-row"><span class="clabel">Ingresos BTC / día</span><span class="cval orange" id="cmp_sin_ingresos">-</span></div>
+        <div class="cmp-row"><span class="clabel">Ganancia neta / día</span><span class="cval" id="cmp_sin_gananciaDia">-</span></div>
+        <div class="cmp-row"><span class="clabel">Ganancia neta / mes</span><span class="cval" id="cmp_sin_gananciaMes">-</span></div>
+        <div class="cmp-row"><span class="clabel">Ganancia neta / año</span><span class="cval" id="cmp_sin_gananciaAnual">-</span></div>
+        <div class="cmp-row"><span class="clabel">Inversión inicial (solo ASIC)</span><span class="cval dim" id="cmp_sin_inversion">-</span></div>
+        <div class="cmp-row"><span class="clabel">ROI del minero</span><span class="cval orange" id="cmp_sin_roi">-</span></div>
+      </div>
+      <div class="compare-col">
+        <div class="col-title green-title">
+          <span class="icon">☀️</span>
+          Con solar — 0 € de electricidad
+        </div>
+        <div class="cmp-row"><span class="clabel">Coste eléctrico / día</span><span class="cval green">0,00 €</span></div>
+        <div class="cmp-row"><span class="clabel">Ingresos BTC / día</span><span class="cval orange" id="cmp_con_ingresos">-</span></div>
+        <div class="cmp-row"><span class="clabel">Ganancia neta / día</span><span class="cval" id="cmp_con_gananciaDia">-</span></div>
+        <div class="cmp-row"><span class="clabel">Ganancia neta / mes</span><span class="cval" id="cmp_con_gananciaMes">-</span></div>
+        <div class="cmp-row"><span class="clabel">Ganancia neta / año</span><span class="cval" id="cmp_con_gananciaAnual">-</span></div>
+        <div class="cmp-row"><span class="clabel">Inversión inicial (ASIC + solar)</span><span class="cval dim" id="cmp_con_inversion">-</span></div>
+        <div class="cmp-row"><span class="clabel">ROI total (minero + solar)</span><span class="cval orange" id="cmp_con_roi">-</span></div>
+      </div>
+    </div>
+    <div class="compare-savings">
+      <div class="saving-item">
+        <div class="slabel">Ahorro eléctrico / día</div>
+        <div class="sval green" id="cmp_ahorroDia">-</div>
+        <div class="ssub">€ que dejas de pagar en luz</div>
+      </div>
+      <div class="saving-item">
+        <div class="slabel">Ahorro eléctrico / mes</div>
+        <div class="sval green" id="cmp_ahorroMes">-</div>
+        <div class="ssub">€/mes ahorrados</div>
+      </div>
+      <div class="saving-item">
+        <div class="slabel">Ahorro eléctrico / año</div>
+        <div class="sval green" id="cmp_ahorroAnual">-</div>
+        <div class="ssub">€/año ahorrados en electricidad</div>
+      </div>
+      <div class="saving-item">
+        <div class="slabel">Mejora de ganancia / año</div>
+        <div class="sval green" id="cmp_mejora">-</div>
+        <div class="ssub">€ más de beneficio con solar</div>
+      </div>
+      <div class="saving-item">
+        <div class="slabel">Amortización solar</div>
+        <div class="sval orange" id="cmp_amortizacion">-</div>
+        <div class="ssub">años para recuperar el coste solar solo con el ahorro eléctrico</div>
+      </div>
+    </div>
+  </div>
+
+  <!-- ════════════════════════════════════════════
+       RENTABILIDAD CON SOLAR
+  ════════════════════════════════════════════ -->
+  <p class="section-title">Rentabilidad con solar (precio BTC actual)</p>
+  <div class="results-grid">
+    <div class="result-card accent-green">
+      <div class="label">Ingresos brutos / día</div>
+      <div class="value green" id="r_ingresosDia">-</div>
+      <div class="sub">€ por minería = ganancia neta con solar</div>
+    </div>
+    <div class="result-card accent-green">
+      <div class="label">Coste eléctrico (con solar)</div>
+      <div class="value green">0,00 €</div>
+      <div class="sub">Paneles + baterías cubren las 24 h</div>
+    </div>
+    <div class="result-card accent-green">
+      <div class="label">Ganancia neta / día</div>
+      <div class="value" id="r_gananciaDia">-</div>
+      <div class="sub">= 100% de los ingresos BTC</div>
+    </div>
+    <div class="result-card accent-green">
+      <div class="label">Ganancia neta / mes</div>
+      <div class="value" id="r_gananciaMes">-</div>
+      <div class="sub">€/mes estimado</div>
+    </div>
+    <div class="result-card accent-green">
+      <div class="label">Ganancia neta / año</div>
+      <div class="value" id="r_gananciaAnual">-</div>
+      <div class="sub">€/año (sin dificultad ni halving)</div>
+    </div>
+    <div class="result-card">
+      <div class="label">ROI total (minero + solar)</div>
+      <div class="value orange" id="r_roiTotal">-</div>
+      <div class="sub">años para recuperar toda la inversión</div>
+    </div>
+  </div>
+
+  <!-- ════════════════════════════════════════════
+       SIMULACIÓN
+  ════════════════════════════════════════════ -->
+  <p class="section-title">Simulación con precio de Bitcoin deseado</p>
+  <div class="sim-card">
+    <div class="sim-header">
+      <h3>¿Qué pasa si Bitcoin llega a...?</h3>
+      <div class="sim-input-wrap">
+        <label>Precio BTC objetivo:</label>
+        <input type="number" class="sim-big-input" id="simBTC" value="250000" min="1" step="1000">
+        <span style="color:var(--text2);font-size:0.85rem;">€</span>
+      </div>
+    </div>
+    <p style="font-size:0.75rem;color:var(--text3);margin-bottom:16px;">
+      El ROI (Return on Investment) indica cuántos años tardarías en recuperar lo invertido a ese precio de Bitcoin, asumiendo que minas y acumulas sin vender.
+    </p>
+    <div class="sim-results">
+      <div class="result-card">
+        <div class="label">Ganancia diaria (sin solar)</div>
+        <div class="value" id="sim_sin_dia">-</div>
+        <div class="sub">€/día pagando toda la luz</div>
+      </div>
+      <div class="result-card accent-green">
+        <div class="label">Ganancia diaria (con solar)</div>
+        <div class="value" id="sim_con_dia">-</div>
+        <div class="sub">€/día — 0 € de electricidad</div>
+      </div>
+      <div class="result-card accent-green">
+        <div class="label">Ganancia anual (con solar)</div>
+        <div class="value green" id="sim_gananciaAnual">-</div>
+        <div class="sub">€ en 1 año</div>
+      </div>
+      <div class="result-card">
+        <div class="label">ROI minero (con solar)</div>
+        <div class="value orange" id="sim_roiMinero">-</div>
+        <div class="sub">años para recuperar el ASIC</div>
+      </div>
+      <div class="result-card">
+        <div class="label">ROI total (minero + solar)</div>
+        <div class="value orange" id="sim_roiTotal">-</div>
+        <div class="sub">años para recuperar todo</div>
+      </div>
+    </div>
+  </div>
+
+  
+  </div><!-- /analysis_basic -->
+
+  <!-- ════ ANÁLISIS AVANZADO ════ -->
+  <div id="analysis_advanced" style="display:none;">
+
+  <!-- ════════════════════════════════════════════
+       ANÁLISIS RENTABILIDAD BATERÍA
+  ════════════════════════════════════════════ -->
+  <p class="section-title">Análisis de rentabilidad de la batería</p>
+  <div class="bat-roi-section" id="batRoiSection">
+
+    <!-- KPIs -->
+    <div class="bat-roi-kpi">
+      <div class="bat-kpi-card">
+        <div class="bat-kpi-label">Consumo nocturno del sistema</div>
+        <div class="bat-kpi-value" id="bat_consumoNoche">-</div>
+        <div class="bat-kpi-sub">kWh/noche que no cubren los paneles (minero + vivienda)</div>
+      </div>
+      <div class="bat-kpi-card">
+        <div class="bat-kpi-label">Coste nocturno sin batería / año</div>
+        <div class="bat-kpi-value red" id="bat_costoNocheAnual">-</div>
+        <div class="bat-kpi-sub">€/año pagados a la eléctrica (noche)</div>
+      </div>
+      <div class="bat-kpi-card accent-green">
+        <div class="bat-kpi-label">Ahorro añadiendo batería / año</div>
+        <div class="bat-kpi-value green" id="bat_ahorroAnual">-</div>
+        <div class="bat-kpi-sub">€/año que dejarías de pagar</div>
+      </div>
+      <div class="bat-kpi-card accent">
+        <div class="bat-kpi-label">Payback de la batería</div>
+        <div class="bat-kpi-value" id="bat_payback">-</div>
+        <div class="bat-kpi-sub">años para recuperar la inversión en baterías</div>
+      </div>
+      <div class="bat-kpi-card">
+        <div class="bat-kpi-label">Vida útil estimada</div>
+        <div class="bat-kpi-value blue" id="bat_vidaUtil">-</div>
+        <div class="bat-kpi-sub">años a 1 ciclo/día</div>
+      </div>
+      <div class="bat-kpi-card">
+        <div class="bat-kpi-label">Coste real del kWh almacenado</div>
+        <div class="bat-kpi-value" id="bat_costePorKWh">-</div>
+        <div class="bat-kpi-sub">€/kWh (total inversión ÷ kWh de vida útil)</div>
+      </div>
+    </div>
+
+    <!-- Recomendación capacidad óptima -->
+    <div class="bat-recomendacion" id="bat_recomendacionBanner">
+      <div class="bat-rec-icon">🔋</div>
+      <div class="bat-rec-content">
+        <h4 id="bat_rec_titulo">Calculando recomendación...</h4>
+        <p id="bat_rec_texto">Introduce los datos del sistema para ver la recomendación de capacidad de batería óptima para tu consumo nocturno.</p>
+      </div>
+    </div>
+
+    <!-- Comparativa sinóptica sin bat vs con bat -->
+    <div class="bat-compare-wrap">
+      <div class="bat-compare-card" style="border-color:rgba(255,69,96,0.3);">
+        <h5 style="color:var(--red);">⚡ Solar sin batería</h5>
+        <div class="bat-row">
+          <span class="bat-row-lbl">Inversión (paneles + extras)</span>
+          <span class="bat-row-val" id="bat_sin_inversion">-</span>
+        </div>
+        <div class="bat-row">
+          <span class="bat-row-lbl">Coste eléctrico nocturno / año</span>
+          <span class="bat-row-val red" id="bat_sin_nocheAnual">-</span>
+        </div>
+        <div class="bat-row">
+          <span class="bat-row-lbl">Coste acumulado 5 años</span>
+          <span class="bat-row-val" id="bat_sin_acum5">-</span>
+        </div>
+        <div class="bat-row">
+          <span class="bat-row-lbl">Coste acumulado 10 años</span>
+          <span class="bat-row-val" id="bat_sin_acum10">-</span>
+        </div>
+        <div class="bat-row">
+          <span class="bat-row-lbl">Coste acumulado 15 años</span>
+          <span class="bat-row-val" id="bat_sin_acum15">-</span>
+        </div>
+        <div class="bat-row">
+          <span class="bat-row-lbl">¿Necesita reponer batería?</span>
+          <span class="bat-row-val" style="color:var(--text3);">No aplica</span>
+        </div>
+      </div>
+
+      <div class="bat-compare-card" style="border-color:rgba(0,208,132,0.35);">
+        <h5 style="color:var(--green);">🔋 Solar con batería</h5>
+        <div class="bat-row">
+          <span class="bat-row-lbl">Inversión (paneles + baterías + extras)</span>
+          <span class="bat-row-val" id="bat_con_inversion">-</span>
+        </div>
+        <div class="bat-row">
+          <span class="bat-row-lbl">Coste eléctrico nocturno / año</span>
+          <span class="bat-row-val green">0,00 €</span>
+        </div>
+        <div class="bat-row">
+          <span class="bat-row-lbl">Coste acumulado 5 años</span>
+          <span class="bat-row-val" id="bat_con_acum5">-</span>
+        </div>
+        <div class="bat-row">
+          <span class="bat-row-lbl">Coste acumulado 10 años</span>
+          <span class="bat-row-val" id="bat_con_acum10">-</span>
+        </div>
+        <div class="bat-row">
+          <span class="bat-row-lbl">Coste acumulado 15 años</span>
+          <span class="bat-row-val" id="bat_con_acum15">-</span>
+        </div>
+        <div class="bat-row">
+          <span class="bat-row-lbl">Reposición batería estimada</span>
+          <span class="bat-row-val orange" id="bat_reposicion">-</span>
+        </div>
+      </div>
+    </div>
+
+    <!-- Tabla año a año -->
+    <div class="bat-timeline">
+      <div class="bat-timeline-header">Evolución año a año — inversión acumulada (batería vs sin batería)
+        <span style="font-size:0.7rem;font-weight:400;text-transform:none;letter-spacing:0;color:var(--blue);">★ Horizonte recomendado: 10 años (período garantía placas + inversor)</span>
+      </div>
+      <div class="table-scroll">
+        <table>
+          <thead>
+            <tr>
+              <th style="text-align:left;">Año</th>
+              <th>Coste elec. noche / año</th>
+              <th>Total sin batería (inversión + noche)</th>
+              <th>Total con batería</th>
+              <th>Diferencia (bat − sin bat)</th>
+              <th>Veredicto</th>
+            </tr>
+          </thead>
+          <tbody id="batTimelineBody"></tbody>
+        </table>
+      </div>
+    </div>
+
+    <!-- Tabla de sensibilidad de precio de batería -->
+    <div class="bat-sensibilidad">
+      <div class="bat-sensibilidad-header">
+        <span>Sensibilidad al precio de la batería</span>
+        <span class="sens-note">¿Cambia la decisión según el precio que consigas? Horizonte: 10 años</span>
+      </div>
+      <div class="table-scroll">
+        <table>
+          <thead>
+            <tr>
+              <th style="text-align:left;">Precio batería</th>
+              <th>Inversión baterías</th>
+              <th>Ahorro / año</th>
+              <th>Payback</th>
+              <th>Coste acum. 10 años (sin bat)</th>
+              <th>Coste acum. 10 años (con bat)</th>
+              <th>Diferencia a 10 años</th>
+              <th>¿Vale la pena?</th>
+            </tr>
+          </thead>
+          <tbody id="batSensibilidadBody"></tbody>
+        </table>
+      </div>
+    </div>
+
+  </div>
+
+  <!-- ════════════════════════════════════════════
+       GRÁFICAS
+  ════════════════════════════════════════════ -->
+  <p class="section-title">Proyección mensual</p>
+  <div class="charts-wrap">
+    <div class="chart-card">
+      <h3>Ganancia acumulada: con solar vs sin solar (€) — incluye dificultad y halving</h3>
+      <canvas id="chartAcumulado" height="300"></canvas>
+    </div>
+    <div class="chart-card">
+      <h3>BTC generado acumulado — incluye dificultad y halving</h3>
+      <canvas id="chartBTC" height="300"></canvas>
+    </div>
+  </div>
+
+  <!-- ════════════════════════════════════════════
+       TABLA MENSUAL
+  ════════════════════════════════════════════ -->
+  <p class="section-title">Tabla de proyección mensual</p>
+  <div class="table-card">
+    <div class="table-header">
+      <span>Desglose mes a mes — dificultad de red y halvings incluidos</span>
+      <span id="tableNote" style="font-size:0.72rem;color:var(--text3);font-weight:400;text-transform:none;letter-spacing:0"></span>
+    </div>
+    <div id="tableDisclaimer" style="padding:6px 16px 10px;font-size:0.71rem;color:var(--text3);border-bottom:1px solid var(--border);"></div>
+    <div class="table-scroll">
+      <table>
+        <thead>
+          <tr>
+            <th>Mes</th>
+            <th>BTC / día</th>
+            <th>BTC generado</th>
+            <th>BTC acumulado</th>
+            <th>Ingresos (€)</th>
+            <th>Coste elec. sin solar (€)</th>
+            <th>Ganancia sin solar (€)</th>
+            <th>Ganancia con solar (€)</th>
+            <th>Gan. acum. con solar (€)</th>
+          </tr>
+        </thead>
+        <tbody id="tableBody"></tbody>
+      </table>
+    </div>
+  </div>
+
+  </div><!-- /analysis_advanced -->
+</main>
+
+<footer>
+  Calculadora basada en la hoja de cálculo original del canal &mdash; Solo para referencia educativa. Los valores de minería y precios BTC son variables. |
+  <a href="https://miningnow.com/" target="_blank" rel="noopener">MiningNow.com</a> &middot;
+  <a href="https://footprinthero.com/peak-sun-hours-calculator" target="_blank" rel="noopener">FootprintHero HSP</a> &middot;
+  <a href="https://dynamic-starship-cd670a.netlify.app" target="_blank" rel="noopener">Calculadora Online</a>
+</footer>
+
+<script>
+  let chartAcum = null, chartBTCLine = null;
+  let currentMode = 'new'; // 'new' | 'existing'
+  let includeBateria = false;  // toggle: ¿se incluye batería en el cálculo?
+  let analysisMode = 'basic';  // 'basic' | 'advanced'
+
+  function toggleBateriaIncluida(include) {
+    includeBateria = include;
+    $('batIncluida_yes').classList.toggle('active', include);
+    $('batIncluida_no').classList.toggle('active', !include);
+    const batFields = $('batFields');
+    if (batFields) batFields.style.display = include ? 'block' : 'none';
+    // Mostrar/ocultar sección ROI batería
+    const batRoi = $('batRoiSection');
+    if (batRoi) batRoi.style.display = include ? 'block' : 'none';
+    calculate();
+  }
+
+  function setAnalysisMode(mode) {
+    analysisMode = mode;
+    $('atab_basic').classList.toggle('active', mode === 'basic');
+    $('atab_advanced').classList.toggle('active', mode === 'advanced');
+    $('analysis_basic').style.display    = mode === 'basic'    ? 'block' : 'none';
+    $('analysis_advanced').style.display = mode === 'advanced' ? 'block' : 'none';
+  }
+
+  const $   = id => document.getElementById(id);
+  const val = id => {
+    const el = $(id);
+    if (!el) { console.warn('val(): elemento no encontrado:', id); return 0; }
+    const v = parseFloat(el.value);
+    return isNaN(v) ? 0 : Math.max(0, v);  // nunca negativo
+  };
+  const fmt = (n, dec=2) => isFinite(n) ? n.toLocaleString('es-ES', {minimumFractionDigits:dec, maximumFractionDigits:dec}) : '—';
+  const fmtBTC = n => isFinite(n) ? n.toFixed(8) : '—';
+  const ceil = Math.ceil;
+
+  function setMode(mode) {
+    currentMode = mode;
+    $('modeNew').classList.toggle('active', mode === 'new');
+    $('modeExisting').classList.toggle('active', mode === 'existing');
+    $('existingCard').style.display      = mode === 'existing' ? 'block' : 'none';
+    $('ampliacionSection').style.display = mode === 'existing' ? 'block' : 'none';
+    // Actualizar título/descripción del paso 2
+    if (mode === 'existing') {
+      if ($('ws2-title')) $('ws2-title').textContent = 'Tu instalación actual y tu minero';
+      if ($('ws2-desc'))  $('ws2-desc').textContent  = 'Indica lo que ya tienes instalado y los datos de tu equipo de minería.';
+    } else {
+      if ($('ws2-title')) $('ws2-title').textContent = 'Tu equipo de minería';
+      if ($('ws2-desc'))  $('ws2-desc').textContent  = 'Introduce los datos de tu ASIC: cuánto consume, cuánto Bitcoin genera al día y cuánto vale.';
+    }
+    // Actualizar etiquetas de resultados
+    const setText = (id, txt) => { const el = $(id); if (el) el.textContent = txt; };
+    if (mode === 'existing') {
+      setText('solarNecesarioTitle', 'Lo que necesitas añadir a tu instalación');
+      setText('r_consumoDiario_lbl', 'Consumo total (minero + vivienda)');
+      setText('r_consumoDiario_sub', 'kWh/día — ASIC + hogar (24 h)');
+      setText('r_paneles_lbl',       'Paneles adicionales que te faltan');
+      setText('r_baterias_lbl',      'Baterías adicionales que te faltan');
+      setText('r_costoSolar_lbl',    'Coste de la ampliación');
+      setText('r_costoSolar_sub',    '€ (solo lo que hay que añadir)');
+    } else {
+      setText('solarNecesarioTitle', 'Sistema solar necesario');
+      setText('r_consumoDiario_lbl', 'Consumo diario del minero');
+      setText('r_consumoDiario_sub', 'kWh/día (24 h continuo)');
+      setText('r_paneles_lbl',       'Paneles necesarios');
+      setText('r_baterias_lbl',      'Baterías necesarias');
+      setText('r_costoSolar_lbl',    'Coste instalación solar');
+      setText('r_costoSolar_sub',    '€ (paneles + baterías + extras)');
+    }
+    calculate();
+  }
+
+  function toggleGuide() {
+    const body = $('guideBody');
+    const chevron = $('guideChevron');
+    const open = body.classList.toggle('open');
+    chevron.classList.toggle('open', open);
+  }
+
+  function toggleTip(id) {
+    $(id).classList.toggle('open');
+  }
+
+  function colorVal(el, v) {
+    el.classList.remove('green','red','orange');
+    el.classList.add(v > 0 ? 'green' : v < 0 ? 'red' : 'orange');
+  }
+
+  function roiStr(years) {
+    if (!isFinite(years) || years <= 0) return 'Nunca';
+    if (years > 99) return '> 99 años';
+    return fmt(years) + ' años';
+  }
+
+  function halvingMultiplierForMonth(monthIndex, halvingDate) {
+    const today    = new Date();
+    const projDate = new Date(today.getFullYear(), today.getMonth() + monthIndex, 1);
+    const hDateIni = new Date(halvingDate);
+    // Fecha inválida → sin halvings
+    if (isNaN(hDateIni.getTime())) return 1;
+    let halvings = 0;
+    let hDate    = new Date(hDateIni);
+    while (hDate <= projDate) {
+      halvings++;
+      // Bitcoin halvings ocurren cada ~4 años (210.000 bloques)
+      hDate = new Date(hDate.getFullYear() + 4, hDate.getMonth(), hDate.getDate());
+    }
+    return Math.pow(0.5, halvings);
+  }
+
+  function monthIndexOfHalving(halvingDate) {
+    const today = new Date();
+    const hDate = new Date(halvingDate);
+    // Fecha inválida o ya pasada → sin halving en proyección
+    if (isNaN(hDate.getTime()) || hDate <= today) return null;
+    const diffMonths = Math.round((hDate - today) / (1000 * 60 * 60 * 24 * 30.44));
+    return diffMonths + 1;
+  }
+
+  // Devuelve array con TODOS los halvings dentro del horizonte de proyección
+  function halvingMonthsInProjection(halvingDate, totalMonths) {
+    const today    = new Date();
+    const hDateIni = new Date(halvingDate);
+    if (isNaN(hDateIni.getTime())) return [];
+    const months = [];
+    let hDate = new Date(hDateIni);
+    while (true) {
+      if (hDate > today) {
+        const diffM = Math.round((hDate - today) / (1000 * 60 * 60 * 24 * 30.44)) + 1;
+        if (diffM > totalMonths) break;
+        months.push(diffM);
+      }
+      hDate = new Date(hDate.getFullYear() + 4, hDate.getMonth(), hDate.getDate());
+      if (hDate.getFullYear() > today.getFullYear() + 30) break; // seguridad
+    }
+    return months;
+  }
+
+  function toggleCapBatExist() {
+    const n = Math.round(val('bateriasExistentes'));
+    const field = $('capBatExistField');
+    if (field) field.style.display = n > 0 ? 'block' : 'none';
+  }
+
+  function applyTarifa(preset) {
+    // Update active button
+    ['preset_manual','preset_2td','preset_ve'].forEach(id => {
+      const btn = $(id);
+      if (btn) btn.classList.remove('active');
+    });
+    if ($('preset_' + preset)) $('preset_' + preset).classList.add('active');
+
+    if (preset === '2td') {
+      // Tarifa 2.0TD España (precios orientativos 2024)
+      $('precioPunta').value  = '0.22';
+      $('precioLlano').value  = '0.14';
+      $('precioValle').value  = '0.05';
+    } else if (preset === 've') {
+      // Tarifa VE Iberdrola (sólo punta y valle, llano = 0)
+      $('precioPunta').value  = '0.4243';
+      $('precioLlano').value  = '0';
+      $('precioValle').value  = '0.03';
+    }
+    // 'manual' → just deselect presets, keep current values
+    calculate();
+  }
+
+  function calculate() {
+    const numMineros  = Math.max(1, Math.round(val('numMineros')));
+    const asicW1      = val('asicW');           // por unidad
+    const asicW       = asicW1 * numMineros;    // total fleet
+    const panelW      = val('panelW');
+    const hsp         = val('hsp');
+    const efic        = val('eficiencia');
+    const capBat      = val('capBateria');
+    const pctBat      = val('pctBateria') / 100;
+    const costPanel   = val('costPanel');
+    const costBat     = val('costBateria');
+    const costExtras  = val('costExtras');
+    const costMinero  = val('costMinero') * numMineros;   // total fleet
+    const precioBTC   = val('precioBTC');
+    const btcDiario   = (parseFloat($('btcDiario').value) || 0) * numMineros; // total fleet
+    const dificAnual  = val('dificultad') / 100;
+    const meses       = Math.max(3, Math.min(120, Math.round(val('mesesProyeccion'))));
+    const halvingDateStr = $('halvingDate').value || '2028-04-23';
+
+    // ── TARIFF RATES (punta / llano / valle) ─────────────────────────
+    // 2.0TD standard hour distribution for a 24/7 constant load:
+    // Punta (P1): Mon-Fri 10-14h + 18-22h = 40h/week → 23.81%
+    // Llano (P2): Mon-Fri 8-10h + 14-18h + 22-24h   = 40h/week → 23.81%
+    // Valle (P3): Mon-Fri 0-8h + all weekend          = 88h/week → 52.38%
+    const PCT_PUNTA  = 40 / 168;
+    const PCT_LLANO  = 40 / 168;
+    const PCT_VALLE  = 88 / 168;
+    const precioPunta = val('precioPunta');
+    const precioLlano = val('precioLlano');
+    const precioValle = val('precioValle');
+    // Weighted average = what a 24/7 device pays per kWh on average
+    const precioElec = PCT_PUNTA * precioPunta + PCT_LLANO * precioLlano + PCT_VALLE * precioValle;
+    // Update display of weighted average
+    $('precioElecCalc').textContent = fmt(precioElec, 4) + ' €/kWh';
+
+    // ── TARIFF BREAKDOWN TABLE (miner annual consumption per period) ──
+    {
+      // Hours/week per period
+      const H_PUNTA = 40, H_LLANO = 40, H_VALLE = 88, H_TOTAL = 168;
+      // kWh/year for the miner per period (asicW * hours_in_period_per_year / 1000)
+      const kWhPunta = (asicW * (H_PUNTA / H_TOTAL) * 8760) / 1000;
+      const kWhLlano = (asicW * (H_LLANO / H_TOTAL) * 8760) / 1000;
+      const kWhValle = (asicW * (H_VALLE / H_TOTAL) * 8760) / 1000;
+      const kWhTotalAnual = kWhPunta + kWhLlano + kWhValle;
+      const costPunta = kWhPunta * precioPunta;
+      const costLlano = kWhLlano * precioLlano;
+      const costValle = kWhValle * precioValle;
+      const costTotalAnual = costPunta + costLlano + costValle;
+      $('td_precio_punta').textContent = fmt(precioPunta, 4) + ' €/kWh';
+      $('td_precio_llano').textContent = fmt(precioLlano, 4) + ' €/kWh';
+      $('td_precio_valle').textContent = fmt(precioValle, 4) + ' €/kWh';
+      $('td_precio_media').textContent = fmt(precioElec, 4) + ' €/kWh (media)';
+      $('td_kwh_punta').textContent = fmt(kWhPunta, 0) + ' kWh';
+      $('td_kwh_llano').textContent = fmt(kWhLlano, 0) + ' kWh';
+      $('td_kwh_valle').textContent = fmt(kWhValle, 0) + ' kWh';
+      $('td_kwh_total').textContent = fmt(kWhTotalAnual, 0) + ' kWh';
+      $('td_cost_punta').textContent = fmt(costPunta, 0) + ' €';
+      $('td_cost_llano').textContent = fmt(costLlano, 0) + ' €';
+      $('td_cost_valle').textContent = fmt(costValle, 0) + ' €';
+      $('td_cost_total').textContent = fmt(costTotalAnual, 0) + ' €/año';
+    }
+
+    // ── EXISTING INSTALLATION (only used in 'existing' mode) ──
+    const consumoHogarAnual  = currentMode === 'existing' ? val('consumoHogar') : 0;  // kWh/año
+    const consumoHogar       = consumoHogarAnual / 365;  // kWh/día (used in daily calcs)
+    const panelesExistentesN = currentMode === 'existing' ? Math.round(val('panelesExistentes')) : 0;
+    const panelWExist        = currentMode === 'existing' ? val('panelWExistente') : 0;
+    const batExistentesN     = currentMode === 'existing' ? Math.round(val('bateriasExistentes')) : 0;
+
+    // Production from existing panels (kWh/day)
+    const prodPanelExist     = panelWExist * hsp * efic / 1000;
+    const prodExistenteDia   = panelesExistentesN * prodPanelExist;
+    // Useful capacity from existing batteries (kWh) — uses their own capacity, not the new battery size
+    const capBatExistKWh  = currentMode === 'existing' && batExistentesN > 0 ? val('capBatExistente') : 0;
+    const capBatExistUtil = batExistentesN * capBatExistKWh * pctBat;
+
+    // ── TOTAL CONSUMPTION (miner + house) ──
+    const consumoDiarioMinero = asicW * 24 / 1000;
+    const consumoDiario       = consumoDiarioMinero + consumoHogar;  // total 24h
+    const consumoDia          = asicW * hsp / 1000 + consumoHogar * (hsp / 24);  // during sun hours
+    const consumoNoche        = consumoDiario - consumoDia;
+
+    // ── SOLAR SIZING ──
+    const prodPanel = panelW * hsp * efic / 1000;  // kWh/día por panel
+    // CON batería: los paneles deben producir para cubrir las 24h (día directo + noche vía batería)
+    // SIN batería: los paneles solo necesitan cubrir el consumo DURANTE las horas de sol
+    //   (de noche el minero tira de la red, no tiene sentido sobredimensionar para almacenar)
+    const consumoACubrir  = includeBateria ? consumoDiario : consumoDia;
+    const panelesExactos  = prodPanel > 0 ? consumoACubrir / prodPanel : 0;
+    const panelesN        = ceil(panelesExactos);
+    const batUti          = capBat * pctBat;
+    const batExactas      = batUti > 0 ? consumoNoche / batUti : 0;
+    const batNTotal       = ceil(batExactas);
+    // Si el usuario no quiere batería, forzamos 0 baterías en todos los cálculos
+    const batN            = includeBateria ? batNTotal : 0;
+    const costoSolar     = panelesN * costPanel + batN * costBat + costExtras;
+
+    // ── ADDITIONAL PANELS/BATTERIES NEEDED (existing mode) ──
+    const panelesAdicionales  = Math.max(0, panelesN - panelesExistentesN);
+    const bateriasAdicionales = Math.max(0, batN - batExistentesN);
+    const costoAmpliacion     = panelesAdicionales * costPanel + bateriasAdicionales * costBat +
+                                (panelesAdicionales > 0 || bateriasAdicionales > 0 ? costExtras : 0);
+
+    // Rentabilidad (comparativa: solo coste eléctrico del minero)
+    const ingresosDia       = btcDiario * precioBTC;
+    // SIN SOLAR: paga las 24h del minero
+    const costoElecSinSolar = consumoDiarioMinero * precioElec;
+    const ganDiaSinSolar    = ingresosDia - costoElecSinSolar;
+    const ganMesSinSolar    = ganDiaSinSolar * 30;
+    const ganAnualSinSolar  = ganDiaSinSolar * 365;
+    const roiSinSolar       = ganAnualSinSolar > 0 ? costMinero / ganAnualSinSolar : Infinity;
+    // CON SOLAR: 0€ electricidad
+    const ganDiaConSolar    = ingresosDia;
+    const ganMesConSolar    = ganDiaConSolar * 30;
+    const ganAnualConSolar  = ganDiaConSolar * 365;
+    const roiConSolar       = ganAnualConSolar > 0 ? (costMinero + costoSolar) / ganAnualConSolar : Infinity;
+    // Ahorro: miner + house electricity (solar covers both)
+    const ahorroDia         = consumoDiario * precioElec;  // total system saving (miner + house if existing mode)
+    const ahorroMes         = ahorroDia * 30;
+    const ahorroAnual       = ahorroDia * 365;
+    const amortSolar        = ahorroAnual > 0 ? costoSolar / ahorroAnual : Infinity;
+
+    // Simulación
+    const simPrice    = val('simBTC');
+    const simIngDia   = btcDiario * simPrice;
+    const simSinDia   = simIngDia - costoElecSinSolar;
+    const simConDia   = simIngDia;
+    const simGanAnual = simConDia * 365;
+    const simRoiMin   = simGanAnual > 0 ? costMinero / simGanAnual : Infinity;
+    const simRoiTot   = simGanAnual > 0 ? (costMinero + costoSolar) / simGanAnual : Infinity;
+
+    // Monthly projection
+    const factorMensual   = Math.pow(1 + dificAnual, 1/12);
+    const halvingMonthIdx = monthIndexOfHalving(halvingDateStr);           // primer halving
+    const halvingMonths   = halvingMonthsInProjection(halvingDateStr, meses); // todos los halvings
+    const halvingMonthsSet = new Set(halvingMonths);
+    const rows = [];
+    let btcAcum = 0, ganAcumCon = 0, ganAcumSin = 0;
+
+    for (let i = 1; i <= meses; i++) {
+      const halvMult       = halvingMultiplierForMonth(i, halvingDateStr);
+      const btcDiaEfect    = btcDiario * halvMult / Math.pow(factorMensual, i - 1);
+      const btcMes         = btcDiaEfect * 30;
+      const ingMes         = btcMes * precioBTC;
+      const costoMesSin    = costoElecSinSolar * 30;
+      const ganMesCon      = ingMes;
+      const ganMesSin      = ingMes - costoMesSin;
+      btcAcum             += btcMes;
+      ganAcumCon          += ganMesCon;
+      ganAcumSin          += ganMesSin;
+      const isHalving = halvingMonthsSet.has(i);  // marca TODOS los halvings en el horizonte
+      rows.push({ mes: i, btcDiaEfect, btcMes, btcAcum, ingMes, costoMesSin, ganMesCon, ganMesSin, ganAcumCon, ganAcumSin, isHalving, halvMult });
+    }
+
+    // ── DOM ──
+    $('r_consumoDiario').textContent  = fmt(consumoDiario) + ' kWh';
+    $('r_consumoDia').textContent     = fmt(consumoDia) + ' kWh';
+    $('r_consumoDia_sub').textContent = consumoHogar > 0
+      ? `Durante las ${fmt(hsp,2)} h de sol — ASIC + vivienda directos desde paneles`
+      : `Durante las ${fmt(hsp,2)} h de sol — el ASIC funciona directo con los paneles`;
+    $('r_consumoNoche').textContent     = fmt(consumoNoche) + ' kWh';
+    $('r_consumoNoche_sub').textContent = consumoHogar > 0
+      ? `kWh/noche: minero (${fmt(consumoDiarioMinero - asicW * hsp / 1000, 2)} kWh) + vivienda (${fmt(consumoHogar * (1 - hsp/24), 2)} kWh)`
+      : (includeBateria ? `kWh que las baterías suministran de noche al minero` : `kWh que consumiría de la red por la noche (sin batería)`);
+
+    // Mostrar/ocultar tarjeta de baterías según toggle
+    const r_card_noche    = document.getElementById('r_card_noche');
+    const r_card_baterias = document.getElementById('r_card_baterias');
+    if (r_card_noche)    r_card_noche.style.display    = 'block';
+    if (r_card_baterias) r_card_baterias.style.display = includeBateria ? 'block' : 'none';
+
+    // En modo existente mostramos ADICIONALES; en modo nuevo mostramos TOTALES
+    if (currentMode === 'existing') {
+      $('r_paneles').textContent     = panelesAdicionales > 0 ? `+${panelesAdicionales}` : '✓ 0';
+      $('r_paneles_sub').textContent = panelesAdicionales > 0
+        ? `De los ${panelesN} necesarios, ya tienes ${panelesExistentesN}`
+        : `Suficiente — tienes ${panelesExistentesN} paneles, el sistema necesita ${panelesN}`;
+      $('r_baterias').textContent    = bateriasAdicionales > 0 ? `+${bateriasAdicionales}` : '✓ 0';
+      $('r_baterias_sub').textContent = bateriasAdicionales > 0
+        ? `De las ${batN} necesarias, ya tienes ${batExistentesN}`
+        : `Suficiente — tienes ${batExistentesN} baterías`;
+      $('r_costoSolar').textContent  = fmt(costoAmpliacion) + ' €';
+    } else {
+      $('r_paneles').textContent        = panelesN;
+      $('r_paneles_sub').textContent    = `Exacto: ${fmt(panelesExactos,2)} paneles de ${panelW}W`;
+      $('r_baterias').textContent       = batN;
+      $('r_baterias_sub').textContent   = includeBateria
+        ? `Exacto: ${fmt(batExactas,2)} baterías de ${capBat} kWh`
+        : `Sin batería (solo paneles solares)`;
+      $('r_costoSolar').textContent     = fmt(costoSolar) + ' €';
+    }
+
+    // ── AMPLIACIÓN DOM (existing mode) ──
+    if (currentMode === 'existing') {
+      const suficiente = prodExistenteDia >= consumoDiario;
+      $('amp_prodActualDia').textContent    = fmt(prodExistenteDia,3) + ' kWh/día';
+      $('amp_capBatActual').textContent     = batExistentesN > 0
+        ? fmt(capBatExistUtil,2) + ' kWh útiles (' + fmt(batExistentesN * capBatExistKWh, 1) + ' kWh nominales)'
+        : '0 kWh (sin baterías)';
+      $('amp_consumoMinero').textContent    = fmt(consumoDiarioMinero,3) + ' kWh/día';
+      $('amp_consumoHogar').textContent     = consumoHogarAnual > 0
+        ? fmt(consumoHogarAnual,0) + ' kWh/año (' + fmt(consumoHogar,2) + ' kWh/día)' : '0 (no introducido)';
+      $('amp_consumoTotal').textContent     = fmt(consumoDiario,3) + ' kWh/día';
+      const sufEl = $('amp_suficiente');
+      sufEl.textContent = suficiente ? '✓ Sí, cubre el consumo total' : '✗ No, necesitas ampliar';
+      sufEl.className   = 'amp-val ' + (suficiente ? 'green' : 'red');
+      $('amp_panelesAdicionales').textContent  = panelesAdicionales > 0
+        ? `+${panelesAdicionales} paneles` : '✓ No hacen falta más';
+      $('amp_bateriasAdicionales').textContent = bateriasAdicionales > 0
+        ? `+${bateriasAdicionales} baterías` : '✓ No hacen falta más';
+      $('amp_costoAmpliacion').textContent  = fmt(costoAmpliacion) + ' €';
+      $('amp_costoTotal').textContent       = fmt(costoAmpliacion + costMinero) + ' € (ASIC + ampliación)';
+      const roiAmp = ganAnualConSolar > 0 ? (costMinero + costoAmpliacion) / ganAnualConSolar : Infinity;
+      $('amp_roi').textContent = roiStr(roiAmp);
+    }
+
+    $('calcBreakdown').innerHTML = `
+      <span>Flota:</span> ${numMineros} minero(s) × ${fmt(asicW1,0)} W = <strong>${fmt(asicW,0)} W total</strong><br>
+      ${consumoHogar > 0 ? `<span>Consumo vivienda:</span> +${fmt(consumoHogarAnual,0)} kWh/año (${fmt(consumoHogar,3)} kWh/día) → <strong>total ${fmt(consumoDiario,3)} kWh/día</strong><br>` : ''}
+      <span>Producción/panel:</span> ${fmt(prodPanel,4)} kWh/día<br>
+      <span>Solar cubre el día:</span> ${fmt(consumoDia/consumoDiario*100,1)}% del consumo total<br>
+      <span>Ahorro eléctrico/día${consumoHogar > 0 ? ' (minero + vivienda)' : ' (minero)'}:</span> ${fmt(ahorroDia,3)} € (${fmt(consumoDiario,3)} kWh × ${fmt(precioElec,4)} €/kWh)<br>
+      <span>BTC/día (total flota):</span> ${fmtBTC(btcDiario)} × ${fmt(precioBTC,0)} € = ${fmt(ingresosDia,3)} €<br>
+      <span>Próximo halving:</span> ${halvingDateStr} → mes ~${halvingMonthIdx ?? 'ya pasó'} de tu proyección
+    `;
+
+    // Comparativa
+    $('cmp_sin_costoElec').textContent   = fmt(costoElecSinSolar) + ' €/día';
+    $('cmp_sin_ingresos').textContent    = fmt(ingresosDia) + ' €/día';
+    const s1 = $('cmp_sin_gananciaDia');  s1.textContent = (ganDiaSinSolar >= 0 ? '+' : '') + fmt(ganDiaSinSolar) + ' €/día';  colorVal(s1, ganDiaSinSolar);
+    const s2 = $('cmp_sin_gananciaMes');  s2.textContent = (ganMesSinSolar >= 0 ? '+' : '') + fmt(ganMesSinSolar) + ' €/mes';  colorVal(s2, ganMesSinSolar);
+    const s3 = $('cmp_sin_gananciaAnual');s3.textContent = (ganAnualSinSolar >= 0 ? '+' : '') + fmt(ganAnualSinSolar) + ' €/año'; colorVal(s3, ganAnualSinSolar);
+    $('cmp_sin_inversion').textContent   = fmt(costMinero) + ' €';
+    $('cmp_sin_roi').textContent         = roiStr(roiSinSolar);
+
+    $('cmp_con_ingresos').textContent    = fmt(ingresosDia) + ' €/día';
+    const c1 = $('cmp_con_gananciaDia'); c1.textContent = '+' + fmt(ganDiaConSolar) + ' €/día'; colorVal(c1, ganDiaConSolar);
+    const c2 = $('cmp_con_gananciaMes'); c2.textContent = '+' + fmt(ganMesConSolar) + ' €/mes'; colorVal(c2, ganMesConSolar);
+    const c3 = $('cmp_con_gananciaAnual');c3.textContent = '+' + fmt(ganAnualConSolar) + ' €/año'; colorVal(c3, ganAnualConSolar);
+    $('cmp_con_inversion').textContent   = fmt(costMinero + costoSolar) + ' €';
+    $('cmp_con_roi').textContent         = roiStr(roiConSolar);
+
+    $('cmp_ahorroDia').textContent    = '+' + fmt(ahorroDia) + ' €';
+    $('cmp_ahorroMes').textContent    = '+' + fmt(ahorroMes) + ' €';
+    $('cmp_ahorroAnual').textContent  = '+' + fmt(ahorroAnual) + ' €';
+    $('cmp_mejora').textContent       = '+' + fmt(ahorroAnual) + ' €';
+    $('cmp_amortizacion').textContent = roiStr(amortSolar);
+
+    const verdict = $('cmp_verdict');
+    if (costoSolar <= 0) {
+      verdict.textContent = 'Sin costes solares registrados'; verdict.className = 'compare-verdict neutral';
+    } else if (amortSolar < 3) {
+      verdict.textContent = '✓ Solar MUY recomendable (< 3 años)'; verdict.className = 'compare-verdict solar-wins';
+    } else if (amortSolar < 6) {
+      verdict.textContent = '✓ Solar recomendable (< 6 años)'; verdict.className = 'compare-verdict solar-wins';
+    } else if (amortSolar < 10) {
+      verdict.textContent = '~ Solar aceptable a largo plazo'; verdict.className = 'compare-verdict neutral';
+    } else {
+      verdict.textContent = '✗ Solar tarda mucho en amortizarse'; verdict.className = 'compare-verdict grid-wins';
+    }
+
+    // Badge
+    const badge = $('statusBadge');
+    if (ganDiaConSolar > 0) {
+      badge.textContent = 'RENTABLE con solar';
+      badge.style.cssText = 'background:rgba(0,208,132,0.15);color:#00d084;border-color:rgba(0,208,132,0.3)';
+    } else if (ganDiaSinSolar > 0) {
+      badge.textContent = 'Rentable solo sin solar';
+      badge.style.cssText = 'background:rgba(247,147,26,0.1);color:#f7931a;border-color:rgba(247,147,26,0.3)';
+    } else {
+      badge.textContent = 'No rentable (precio actual)';
+      badge.style.cssText = 'background:rgba(255,69,96,0.15);color:#ff4560;border-color:rgba(255,69,96,0.3)';
+    }
+
+    // Rentabilidad con solar
+    const g1 = $('r_gananciaDia');    g1.textContent = '+' + fmt(ganDiaConSolar) + ' €'; colorVal(g1, ganDiaConSolar);
+    const g2 = $('r_gananciaMes');    g2.textContent = '+' + fmt(ganMesConSolar) + ' €'; colorVal(g2, ganMesConSolar);
+    const g3 = $('r_gananciaAnual');  g3.textContent = '+' + fmt(ganAnualConSolar) + ' €'; colorVal(g3, ganAnualConSolar);
+    $('r_ingresosDia').textContent = fmt(ingresosDia) + ' €';
+    $('r_roiTotal').textContent    = roiStr(roiConSolar);
+
+    // Simulación
+    const ss = $('sim_sin_dia'); ss.textContent = (simSinDia >= 0 ? '+' : '') + fmt(simSinDia) + ' €'; colorVal(ss, simSinDia);
+    const sc = $('sim_con_dia'); sc.textContent = '+' + fmt(simConDia) + ' €'; colorVal(sc, simConDia);
+    const sa = $('sim_gananciaAnual'); sa.textContent = '+' + fmt(simGanAnual) + ' €'; colorVal(sa, simGanAnual);
+    $('sim_roiMinero').textContent = roiStr(simRoiMin);
+    $('sim_roiTotal').textContent  = roiStr(simRoiTot);
+
+    // Tabla
+    $('tableBody').innerHTML = rows.map(r => {
+      const hBadge = r.isHalving ? ` <span class="halving-badge">HALVING ×0.5</span>` : '';
+      return `<tr class="${r.isHalving ? 'halving-row' : ''}">
+        <td>${r.mes}${hBadge}</td>
+        <td class="btc-val">${fmtBTC(r.btcDiaEfect)}</td>
+        <td class="btc-val">${fmtBTC(r.btcMes)}</td>
+        <td class="btc-val">${fmtBTC(r.btcAcum)}</td>
+        <td>${fmt(r.ingMes)} €</td>
+        <td class="neg">${fmt(r.costoMesSin)} €</td>
+        <td class="${r.ganMesSin >= 0 ? 'pos' : 'neg'}">${r.ganMesSin >= 0 ? '+' : ''}${fmt(r.ganMesSin)} €</td>
+        <td class="${r.ganMesCon >= 0 ? 'pos' : 'neg'}">${r.ganMesCon >= 0 ? '+' : ''}${fmt(r.ganMesCon)} €</td>
+        <td class="${r.ganAcumCon >= 0 ? 'pos' : 'neg'}">${r.ganAcumCon >= 0 ? '+' : ''}${fmt(r.ganAcumCon)} €</td>
+      </tr>`;
+    }).join('');
+
+    $('tableNote').textContent = `Dificultad +${fmt(val('dificultad'),2)}%/año · Halving: ${halvingDateStr}` + (includeBateria ? '' : ' · Sin batería: nocturno a precio de red');
+    const disc = $('tableDisclaimer');
+    if (disc) disc.innerHTML = includeBateria
+      ? '⚠ "Ganancia con solar" asume coste eléctrico <strong>0 €</strong> (batería cubre la noche). La reposición de batería al fin de su vida útil <strong>no está incluida</strong> — consúltala en el análisis de batería.'
+      : 'ℹ "Ganancia con solar" cubre solo las horas de sol. El consumo nocturno se factura a tu tarifa de red. Añade batería para eliminar ese coste.';
+
+    updateCharts(rows, costMinero, costoSolar, halvingMonthIdx);
+
+    // ── BATTERY ROI SECTION ───────────────────────────────────────────
+    // Solo calcular si el usuario ha activado el toggle de batería
+    const batRoiSection = $('batRoiSection');
+    if (batRoiSection) batRoiSection.style.display = includeBateria ? 'block' : 'none';
+    if (includeBateria) {
+      updateBatteryROI({
+        consumoNoche, consumoDiarioMinero, precioElec,
+        batN, costBateria: costBat, capBat, pctBat,
+        panelesN, costPanel, costExtras
+      });
+    }
+  }
+
+  function updateBatteryROI({ consumoNoche, consumoDiarioMinero, precioElec, batN, costBateria, capBat, pctBat, panelesN, costPanel, costExtras }) {
+    const ciclos       = Math.max(500, val('ciclosBat') || 6000);
+    const invBat       = batN * costBateria;               // total battery investment
+    const invSinBat    = panelesN * costPanel + costExtras; // panels + extras only
+    const invConBat    = invSinBat + invBat;               // full investment with batteries
+
+    // Nightly cost WITHOUT battery (pays grid rate every night)
+    const costoNocheDia    = consumoNoche * precioElec;    // €/night
+    const costoNocheAnual  = costoNocheDia * 365;          // €/year
+
+    // With battery = 0€ nighttime, so annual saving = costoNocheAnual
+    const ahorroAnualBat   = costoNocheAnual;
+
+    // Battery payback (years to recover invBat via saved electricity)
+    const paybackBat = invBat > 0 && ahorroAnualBat > 0 ? invBat / ahorroAnualBat : Infinity;
+
+    // Battery lifespan (cycles / 365 days assuming 1 cycle per day)
+    const vidaUtilBat = ciclos / 365;
+
+    // Real cost per kWh stored over battery lifetime
+    const kWhTotales = ciclos * batN * capBat * pctBat; // total kWh stored over full life
+    const costePorKWh = kWhTotales > 0 ? invBat / kWhTotales : 0;
+
+    // Cumulative totals: sin bat = invest panels + pay nightly each year
+    // Con bat = invest panels+bat + 0 nightly + replace bat every vidaUtilBat years
+    function acumSinBat(years) {
+      return invSinBat + costoNocheAnual * years;
+    }
+    function acumConBat(years) {
+      // Number of battery replacements AFTER initial purchase
+      // e.g., at year 17 with lifespan 16.4y → replace once
+      const extraReplacements = Math.floor(years / vidaUtilBat);
+      return invConBat + invBat * extraReplacements; // 0 nighttime cost
+    }
+
+    // Year-by-year table (show years 1,2,3,4,5,6,7,8,10,12,15,20,25)
+    // Also insert the battery replacement year if it falls between listed years
+    const baseYears = [1,2,3,4,5,6,7,8,10,12,15,20,25];
+    const repYear   = Math.round(vidaUtilBat); // ~16 for 6000 cycles
+    const yearsToShow = (invBat > 0 && repYear > 0 && !baseYears.includes(repYear))
+      ? [...baseYears, repYear].sort((a,b) => a-b)
+      : baseYears;
+    let breakEvenReached = false;
+    const tableRows = yearsToShow.map(y => {
+      const sinBat = acumSinBat(y);
+      const conBat = acumConBat(y);
+      const diff   = conBat - sinBat; // positive = battery still costs more; negative = battery wins
+      const isBreakEven = !breakEvenReached && diff <= 0;
+      if (isBreakEven) breakEvenReached = true;
+      const isRepYear = invBat > 0 && Math.floor(y / vidaUtilBat) > Math.floor((y - 1) / vidaUtilBat);
+      return { y, sinBat, conBat, diff, isBreakEven, isRepYear };
+    });
+
+    // ── DOM ──
+    $('bat_consumoNoche').textContent    = fmt(consumoNoche,3) + ' kWh';
+    $('bat_costoNocheAnual').textContent = fmt(costoNocheAnual) + ' €';
+    $('bat_ahorroAnual').textContent     = invBat > 0 ? '+' + fmt(ahorroAnualBat) + ' €' : '—';
+    $('bat_payback').textContent         = invBat > 0 ? (isFinite(paybackBat) ? fmt(paybackBat,1) + ' años' : '> 50 años') : 'Sin baterías';
+    $('bat_vidaUtil').textContent        = fmt(vidaUtilBat,1) + ' años';
+    $('bat_costePorKWh').textContent     = kWhTotales > 0 ? fmt(costePorKWh,4) + ' €/kWh' : '—';
+
+    $('bat_sin_inversion').textContent   = fmt(invSinBat) + ' €';
+    $('bat_sin_nocheAnual').textContent  = fmt(costoNocheAnual) + ' €/año';
+    $('bat_sin_acum5').textContent       = fmt(acumSinBat(5)) + ' €';
+    $('bat_sin_acum10').textContent      = fmt(acumSinBat(10)) + ' €';
+    $('bat_sin_acum15').textContent      = fmt(acumSinBat(15)) + ' €';
+
+    $('bat_con_inversion').textContent   = fmt(invConBat) + ' €';
+    $('bat_con_acum5').textContent       = fmt(acumConBat(5)) + ' €';
+    $('bat_con_acum10').textContent      = fmt(acumConBat(10)) + ' €';
+    $('bat_con_acum15').textContent      = fmt(acumConBat(15)) + ' €';
+    $('bat_reposicion').textContent      = invBat > 0
+      ? `Año ~${fmt(vidaUtilBat,0)} (${fmt(invBat)} €)`
+      : 'Sin baterías';
+
+    // ── RECOMMENDED BATTERY CAPACITY ──────────────────────────────────
+    // Optimal capacity = nighttime kWh needed / utilizable fraction (pctBat)
+    const batUtiLocal   = capBat * pctBat;                     // fix: compute locally, not from outer scope
+    const capOptima     = pctBat > 0 ? consumoNoche / pctBat : 0; // kWh nominal needed
+    const capActual     = batN * capBat;
+    const capDiff       = capActual - capOptima;
+
+    if (capBat > 0) {
+      // Show recommendation regardless of whether cost is filled in
+      const isOptimal = Math.abs(capDiff) < capBat * 0.5; // within half a battery of optimal
+      const isOver    = capDiff > capBat * 0.5;
+      $('bat_rec_titulo').textContent = isOptimal
+        ? `✓ Tu configuración de batería es correcta (${fmt(capActual,0)} kWh)`
+        : isOver
+          ? `⚠ Posible sobredimensionado (tienes ${fmt(capActual,0)} kWh, necesitas ~${fmt(capOptima,0)} kWh)`
+          : `⚠ Capacidad insuficiente (tienes ${fmt(capActual,0)} kWh, necesitas ~${fmt(capOptima,0)} kWh)`;
+      $('bat_rec_titulo').style.color = isOptimal ? 'var(--green)' : 'var(--orange)';
+      $('bat_recomendacionBanner').style.borderColor = isOptimal
+        ? 'rgba(0,208,132,0.3)' : 'rgba(247,147,26,0.35)';
+
+      const paybackTxt = invBat > 0 && isFinite(paybackBat)
+        ? ` Se amortiza en <strong>${fmt(paybackBat,1)} años</strong>${paybackBat < 10 ? ' — dentro del período de garantía (10 años). Decisión sólida.' : '. Considera si ese horizonte encaja con tus planes.'}`
+        : invBat === 0 ? ' <em style="color:var(--text3);">(introduce el coste de la batería para ver el payback)</em>' : '';
+
+      $('bat_rec_texto').innerHTML = isOptimal
+        ? `Tu batería de <strong>${fmt(capActual,0)} kWh</strong> está bien dimensionada para cubrir <strong>${fmt(consumoNoche,2)} kWh</strong> nocturnos al día (utilizable al ${Math.round(pctBat*100)}%).${paybackTxt}`
+        : isOver
+          ? `Con <strong>${fmt(capActual,0)} kWh</strong> tienes más capacidad de la necesaria para tus <strong>${fmt(consumoNoche,2)} kWh</strong> nocturnos. El óptimo sería ~<strong>${fmt(capOptima,0)} kWh</strong>. Una batería más pequeña daría la misma cobertura con menor inversión y payback más rápido.${paybackTxt}`
+          : `Con <strong>${fmt(capActual,0)} kWh</strong> no cubres tus <strong>${fmt(consumoNoche,2)} kWh</strong> nocturnos. Necesitarías al menos <strong>${fmt(capOptima,0)} kWh</strong> nominales. Añade más baterías o revisa el % utilizable.${paybackTxt}`;
+    } else {
+      $('bat_rec_titulo').textContent = '🔋 Capacidad óptima de batería recomendada';
+      $('bat_rec_titulo').style.color = 'var(--text2)';
+      $('bat_recomendacionBanner').style.borderColor = 'rgba(0,208,132,0.25)';
+      $('bat_rec_texto').innerHTML = `Para cubrir <strong>${fmt(consumoNoche,2)} kWh</strong> nocturnos con baterías al ${Math.round(pctBat*100)}% de utilización necesitarías al menos <strong>${fmt(capOptima,1)} kWh</strong> nominales. Introduce la capacidad y coste de batería en los campos de arriba para ver el análisis completo.`;
+    }
+
+    // ── TIMELINE TABLE ────────────────────────────────────────────────
+    $('batTimelineBody').innerHTML = tableRows.map(r => {
+      const isBreak = r.isBreakEven;
+      const isY10   = r.y === 10;
+      const badge   = isBreak ? `<span class="breakeven-badge">BREAKEVEN</span>` : '';
+      const y10Badge = isY10 ? `<span style="display:inline-block;background:var(--blue);color:white;font-size:0.6rem;font-weight:800;padding:2px 6px;border-radius:4px;margin-left:6px;">★ REC.</span>` : '';
+      const repNote = r.isRepYear && invBat > 0 ? ` <span style="font-size:0.65rem;color:var(--orange);">(reponer bat.)</span>` : '';
+      const diffColor = r.diff <= 0 ? 'style="color:var(--green);font-weight:800;"' : 'style="color:var(--red);"';
+      const verdict = r.diff <= 0
+        ? `<span style="color:var(--green);font-weight:700;">✓ Batería gana</span>`
+        : `<span style="color:var(--text3);">Sin batería mejor</span>`;
+      const rowClass = [isBreak ? 'bat-breakeven' : '', isY10 ? 'bat-year10' : ''].filter(Boolean).join(' ');
+      return `<tr class="${rowClass}">
+        <td>Año ${r.y}${badge}${y10Badge}${repNote}</td>
+        <td class="neg">${fmt(costoNocheAnual)} €</td>
+        <td>${fmt(r.sinBat)} €</td>
+        <td>${fmt(r.conBat)} €</td>
+        <td ${diffColor}>${r.diff >= 0 ? '+' : ''}${fmt(r.diff)} €</td>
+        <td>${invBat > 0 ? verdict : '<span style="color:var(--text3)">Sin baterías</span>'}</td>
+      </tr>`;
+    }).join('');
+
+    // ── SENSITIVITY TABLE ─────────────────────────────────────────────
+    // For each battery price scenario, show payback and 10-year cost comparison
+    const priceSensitivity = [100, 150, 200, 300, 400, 500, 600, 800];
+    const currentPricePerKWh = capActual > 0 ? invBat / capActual : 0;
+
+    $('batSensibilidadBody').innerHTML = priceSensitivity.map(pricePerKWh => {
+      const invBatSens     = capActual * pricePerKWh;           // total bat cost at this price
+      const invConBatSens  = invSinBat + invBatSens;
+      const paybackSens    = ahorroAnualBat > 0 ? invBatSens / ahorroAnualBat : Infinity;
+      const vidaUtilSens   = vidaUtilBat; // same cycles, same lifespan
+      // 10-year cumulative
+      const sin10          = acumSinBat(10);
+      const extraRep10     = Math.floor(10 / vidaUtilSens);
+      const con10          = invConBatSens + invBatSens * extraRep10; // 0 nightly cost
+      const diff10         = con10 - sin10;
+      const isCurrent      = capActual > 0 && Math.abs(currentPricePerKWh - pricePerKWh) < 50;
+      const diffColor      = diff10 <= 0 ? 'color:var(--green);font-weight:800;' : 'color:var(--red);';
+      const verdict        = diff10 <= 0
+        ? `<span style="color:var(--green);font-weight:700;">✓ Vale la pena</span>`
+        : `<span style="color:var(--red);">✗ No compensa</span>`;
+      return `<tr class="${isCurrent ? 'sens-current' : ''}">
+        <td>${pricePerKWh} €/kWh</td>
+        <td>${invBatSens > 0 ? fmt(invBatSens) + ' €' : '—'}</td>
+        <td>${ahorroAnualBat > 0 ? '+' + fmt(ahorroAnualBat) + ' €' : '—'}</td>
+        <td>${isFinite(paybackSens) ? fmt(paybackSens,1) + ' años' : '—'}</td>
+        <td>${fmt(sin10)} €</td>
+        <td>${invBatSens > 0 ? fmt(con10) + ' €' : '—'}</td>
+        <td style="${diffColor}">${invBatSens > 0 ? (diff10 >= 0 ? '+' : '') + fmt(diff10) + ' €' : '—'}</td>
+        <td>${invBatSens > 0 ? verdict : '<span style="color:var(--text3)">Sin datos</span>'}</td>
+      </tr>`;
+    }).join('');
+  }
+
+  function updateCharts(rows, costMinero, costoSolar, halvingMonthIdx) {
+    const light     = isLight();
+    const tickColor = light ? '#666' : '#666';
+    const gridColor = light ? '#e8eaf0' : '#1a1a1a';
+    const ttBg      = light ? '#ffffff' : '#1e1e1e';
+    const ttBorder  = light ? '#e0e3eb' : '#2a2a2a';
+    const ttTitle   = light ? '#1a1a2e' : '#e8e8e8';
+    const ttBody    = light ? '#555'    : '#999';
+    const legendClr = light ? '#555'    : '#999';
+
+    const labels   = rows.map(r => `M${r.mes}`);
+    const acumCon  = rows.map(r => parseFloat(r.ganAcumCon.toFixed(2)));
+    const acumSin  = rows.map(r => parseFloat(r.ganAcumSin.toFixed(2)));
+    const invTotal = -(costMinero + costoSolar);
+
+    const c1el = $('chartAcumulado');
+    if (!c1el) return;
+    const ctx1 = c1el.getContext('2d');
+    if (chartAcum) chartAcum.destroy();
+    chartAcum = new Chart(ctx1, {
+      type: 'line',
+      data: {
+        labels,
+        datasets: [
+          { label: 'Con solar (€)', data: acumCon, borderColor: '#00d084', backgroundColor: 'rgba(0,208,132,0.06)', borderWidth: 2, pointRadius: 2, pointHoverRadius: 5, fill: true, tension: 0.3 },
+          { label: 'Sin solar (€)', data: acumSin, borderColor: '#ff4560', backgroundColor: 'rgba(255,69,96,0.04)', borderWidth: 2, pointRadius: 2, pointHoverRadius: 5, fill: true, tension: 0.3 },
+          { label: 'Inversión total (€)', data: rows.map(() => invTotal), borderColor: 'rgba(247,147,26,0.4)', borderDash: [6,4], borderWidth: 1.5, pointRadius: 0, fill: false }
+        ]
+      },
+      options: {
+        responsive: true,
+        interaction: { mode: 'index', intersect: false },
+        plugins: {
+          legend: { labels: { color: legendClr, font: { size: 11 } } },
+          tooltip: {
+            backgroundColor: ttBg, borderColor: ttBorder, borderWidth: 1,
+            titleColor: ttTitle, bodyColor: ttBody,
+            callbacks: { afterTitle: items => { const i = items[0].dataIndex; return (halvingMonthIdx && i+1 === halvingMonthIdx) ? '⚡ MES DEL HALVING' : ''; } }
+          }
+        },
+        scales: {
+          x: { ticks: { color: tickColor, maxTicksLimit: 12 }, grid: { color: gridColor } },
+          y: { ticks: { color: tickColor, callback: v => fmt(v,0) + ' €' }, grid: { color: gridColor } }
+        }
+      }
+    });
+
+    const c2el = $('chartBTC');
+    if (!c2el) return;
+    const ctx2 = c2el.getContext('2d');
+    if (chartBTCLine) chartBTCLine.destroy();
+    chartBTCLine = new Chart(ctx2, {
+      type: 'line',
+      data: {
+        labels,
+        datasets: [{ label: 'BTC acumulado', data: rows.map(r => parseFloat(r.btcAcum.toFixed(8))), borderColor: '#f7931a', backgroundColor: 'rgba(247,147,26,0.1)', borderWidth: 2, pointRadius: 2, fill: true, tension: 0.3 }]
+      },
+      options: {
+        responsive: true,
+        interaction: { mode: 'index', intersect: false },
+        plugins: {
+          legend: { labels: { color: legendClr, font: { size: 11 } } },
+          tooltip: {
+            backgroundColor: ttBg, borderColor: ttBorder, borderWidth: 1,
+            titleColor: ttTitle, bodyColor: ttBody,
+            callbacks: { label: c => `BTC: ${c.raw.toFixed(8)}`, afterTitle: items => { const i = items[0].dataIndex; return (halvingMonthIdx && i+1 === halvingMonthIdx) ? '⚡ HALVING — BTC se reduce ×0.5' : ''; } }
+          }
+        },
+        scales: {
+          x: { ticks: { color: tickColor, maxTicksLimit: 12 }, grid: { color: gridColor } },
+          y: { ticks: { color: tickColor, callback: v => v.toFixed(4) }, grid: { color: gridColor } }
+        }
+      }
+    });
+  }
+
+  // ── THEME ─────────────────────────────────────────────
+  function isLight() { return document.documentElement.classList.contains('light'); }
+
+  function applyThemeUI() {
+    const light = isLight();
+    $('themeIcon').textContent  = light ? '🌙' : '☀️';
+    $('themeLabel').textContent = light ? 'Modo oscuro' : 'Modo claro';
+  }
+
+  function toggleTheme() {
+    document.documentElement.classList.toggle('light');
+    localStorage.setItem('theme', isLight() ? 'light' : 'dark');
+    applyThemeUI();
+    calculate(); // redraw charts with new colors
+  }
+
+  // ── BITCOIN PRICE AUTO-FETCH ──────────────────────────
+  let btcPriceLastFetch = null;
+
+  function setBTCStatus(msg, color) {
+    $('btcStatusMsg').textContent = msg;
+    $('btcStatusDot').style.background = color;
+  }
+
+  async function fetchBTCPrice() {
+    const btn = $('btcRefreshBtn');
+    btn.textContent = '⏳';
+    btn.style.pointerEvents = 'none';
+    setBTCStatus('Obteniendo precio en tiempo real...', '#f7931a');
+
+    const sources = [
+      {
+        url: 'https://api.binance.com/api/v3/ticker/price?symbol=BTCEUR',
+        parse: d => parseFloat(d.price)
+      },
+      {
+        url: 'https://api.coingecko.com/api/v3/simple/price?ids=bitcoin&vs_currencies=eur',
+        parse: d => d.bitcoin.eur
+      }
+    ];
+
+    for (const src of sources) {
+      try {
+        const res  = await fetch(src.url, { signal: AbortSignal.timeout(7000) });
+        if (!res.ok) continue;
+        const data = await res.json();
+        const price = src.parse(data);
+        if (!price || isNaN(price)) continue;
+
+        $('precioBTC').value = Math.round(price);
+        btcPriceLastFetch = new Date();
+        const timeStr = btcPriceLastFetch.toLocaleTimeString('es-ES', { hour: '2-digit', minute: '2-digit' });
+        setBTCStatus(`✓ Precio en vivo · actualizado ${timeStr}`, '#00d084');
+        btn.textContent = '↻';
+        btn.style.pointerEvents = 'auto';
+        calculate();
+        return;
+      } catch (_) { /* try next source */ }
+    }
+
+    // All failed — NO ponemos precio inventado. El usuario debe introducirlo manualmente.
+    // Si el campo ya tenía un valor previo (del usuario) lo respetamos; si no, lo dejamos vacío.
+    if (!$('precioBTC').value) {
+      $('precioBTC').placeholder = 'Introduce el precio BTC';
+    }
+    setBTCStatus('⚠ Sin conexión — introduce el precio actual de Bitcoin manualmente', '#ff4560');
+    btn.textContent = '↻';
+    btn.style.pointerEvents = 'auto';
+    calculate();
+  }
+
+  // ── INIT ──────────────────────────────────────────────
+  // Restore saved theme
+  if (localStorage.getItem('theme') === 'light') {
+    document.documentElement.classList.add('light');
+  }
+  applyThemeUI();
+
+  document.querySelectorAll('input').forEach(inp => inp.addEventListener('input', calculate));
+
+  // Fetch BTC price on load, then recalculate every 5 minutes
+  fetchBTCPrice();
+  setInterval(fetchBTCPrice, 5 * 60 * 1000);
+</script>
+
+</body>
+</html>
