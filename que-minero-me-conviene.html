@@ -1,0 +1,526 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>¿Qué Minero Me Conviene? — Sin coste de luz</title>
+  <style>
+    :root {
+      --bg: #0d0d0d; --bg2: #161616; --bg3: #1e1e1e;
+      --border: #2a2a2a; --orange: #f7931a; --green: #00d084;
+      --red: #ff4560; --blue: #4e9af1; --text: #e8e8e8;
+      --text2: #999; --text3: #666; --radius: 12px;
+      --shadow: rgba(0,0,0,0.4);
+    }
+    html.light {
+      --bg: #f0f2f5; --bg2: #ffffff; --bg3: #f5f6fa;
+      --border: #dde1ec; --text: #1a1a2e; --text2: #50526b;
+      --text3: #8a8da8; --shadow: rgba(0,0,0,0.06);
+    }
+    * { box-sizing: border-box; margin: 0; padding: 0; }
+    body { background: var(--bg); color: var(--text); font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif; min-height: 100vh; }
+
+    /* HEADER */
+    header {
+      background: #111; border-bottom: 1px solid var(--border);
+      padding: 14px 24px; display: flex; align-items: center; gap: 16px; flex-wrap: wrap;
+    }
+    html.light header { background: #fff; }
+    .logo { font-size: 1.8rem; line-height: 1; }
+    header > div { flex: 1; min-width: 200px; }
+    header h1 { font-size: 1.1rem; font-weight: 800; color: var(--text); line-height: 1.2; }
+    header h1 span { color: var(--orange); }
+    header p { font-size: 0.78rem; color: var(--text2); margin-top: 3px; }
+    .author-line { font-size: 0.72rem; color: var(--text3); margin-top: 4px; }
+    .author-line a { color: var(--orange); text-decoration: none; }
+    .header-btn {
+      display: flex; align-items: center; gap: 6px; padding: 7px 14px;
+      border-radius: 8px; border: 1px solid var(--border); background: var(--bg2);
+      color: var(--text); font-size: 0.8rem; font-weight: 600; cursor: pointer;
+      text-decoration: none; white-space: nowrap; transition: border-color .2s;
+    }
+    .header-btn:hover { border-color: var(--orange); }
+    .header-btn.cta { background: var(--orange); color: #000; border-color: var(--orange); font-weight: 800; }
+
+    /* MAIN */
+    main { max-width: 1200px; margin: 0 auto; padding: 24px 16px; }
+
+    /* CONFIG CARD */
+    .config-card {
+      background: var(--bg2); border: 1px solid var(--border);
+      border-radius: var(--radius); padding: 20px 24px; margin-bottom: 24px;
+    }
+    .config-title {
+      font-size: 0.78rem; font-weight: 700; color: var(--text2);
+      text-transform: uppercase; letter-spacing: 0.08em;
+      margin-bottom: 16px; padding-bottom: 12px; border-bottom: 1px solid var(--border);
+      display: flex; align-items: center; gap: 8px;
+    }
+    .config-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(200px, 1fr)); gap: 14px; }
+    .field label { display: block; font-size: 0.72rem; font-weight: 700; color: var(--text2); margin-bottom: 6px; text-transform: uppercase; letter-spacing: 0.05em; }
+    .input-wrap {
+      display: flex; align-items: center; gap: 0;
+      background: var(--bg3); border: 1px solid var(--border);
+      border-radius: 8px; overflow: hidden; transition: border-color .2s;
+    }
+    .input-wrap:focus-within { border-color: var(--orange); }
+    .input-wrap input { flex: 1; background: transparent; border: none; outline: none; padding: 9px 12px; font-size: 0.9rem; color: var(--text); min-width: 0; }
+    .input-wrap .unit { padding: 9px 10px; font-size: 0.75rem; color: var(--text3); background: var(--bg2); border-left: 1px solid var(--border); white-space: nowrap; }
+    .btc-status { font-size: 0.7rem; margin-top: 5px; }
+
+    /* FILTRO PRESUPUESTO */
+    .filter-bar {
+      background: var(--bg2); border: 1px solid var(--border);
+      border-radius: var(--radius); padding: 14px 20px;
+      display: flex; align-items: center; gap: 16px; flex-wrap: wrap;
+      margin-bottom: 20px;
+    }
+    .filter-bar label { font-size: 0.78rem; color: var(--text2); font-weight: 700; white-space: nowrap; }
+    .filter-bar input[type=range] { flex: 1; min-width: 120px; accent-color: var(--orange); }
+    .filter-val { font-size: 0.88rem; font-weight: 800; color: var(--orange); white-space: nowrap; min-width: 80px; }
+    .sort-bar { display: flex; align-items: center; gap: 10px; flex-wrap: wrap; }
+    .sort-btn {
+      padding: 5px 12px; border-radius: 6px; border: 1px solid var(--border);
+      background: var(--bg3); color: var(--text2); font-size: 0.75rem; font-weight: 600;
+      cursor: pointer; transition: all .15s;
+    }
+    .sort-btn.active { background: var(--orange); color: #000; border-color: var(--orange); }
+
+    /* TABLA MINEROS */
+    .table-card {
+      background: var(--bg2); border: 1px solid var(--border);
+      border-radius: var(--radius); overflow: hidden;
+    }
+    .table-scroll { overflow-x: auto; }
+    table { width: 100%; border-collapse: collapse; min-width: 760px; }
+    thead tr { background: rgba(247,147,26,0.07); }
+    th {
+      padding: 10px 14px; font-size: 0.7rem; font-weight: 700; text-align: right;
+      color: var(--text2); text-transform: uppercase; letter-spacing: 0.06em;
+      white-space: nowrap; cursor: pointer; user-select: none;
+    }
+    th:first-child { text-align: left; }
+    th:hover { color: var(--orange); }
+    th.sorted { color: var(--orange); }
+    td { padding: 11px 14px; font-size: 0.82rem; text-align: right; border-bottom: 1px solid var(--border); vertical-align: middle; }
+    td:first-child { text-align: left; }
+    tbody tr:last-child td { border-bottom: none; }
+    tbody tr:hover { background: rgba(255,255,255,0.02); }
+    html.light tbody tr:hover { background: rgba(0,0,0,0.015); }
+    .miner-name { font-weight: 700; color: var(--text); }
+    .miner-brand { font-size: 0.68rem; color: var(--text3); display: block; margin-top: 1px; }
+    .pos { color: var(--green); font-weight: 700; }
+    .neg { color: var(--red); }
+    .orange { color: var(--orange); font-weight: 700; }
+    .muted { color: var(--text3); }
+
+    /* ROI badge */
+    .roi-badge {
+      display: inline-block; padding: 3px 8px; border-radius: 6px;
+      font-size: 0.76rem; font-weight: 800;
+    }
+    .roi-fast { background: rgba(0,208,132,0.15); color: var(--green); }
+    .roi-mid  { background: rgba(247,147,26,0.15); color: var(--orange); }
+    .roi-slow { background: rgba(255,69,96,0.12); color: var(--red); }
+    .roi-never{ background: rgba(255,255,255,0.04); color: var(--text3); }
+
+    /* Precio editable */
+    .price-input {
+      background: var(--bg3); border: 1px solid var(--border);
+      border-radius: 6px; padding: 4px 8px; font-size: 0.82rem;
+      color: var(--text); width: 80px; text-align: right; outline: none;
+    }
+    .price-input:focus { border-color: var(--orange); }
+
+    /* Botón comprar */
+    .btn-buy {
+      display: inline-flex; align-items: center; gap: 5px;
+      padding: 6px 12px; border-radius: 7px;
+      background: var(--orange); color: #000; font-weight: 800;
+      font-size: 0.75rem; text-decoration: none; white-space: nowrap;
+      transition: opacity .15s;
+    }
+    .btn-buy:hover { opacity: 0.85; }
+
+    /* TARJETAS RESUMEN */
+    .summary-grid {
+      display: grid; grid-template-columns: repeat(auto-fill, minmax(200px, 1fr));
+      gap: 14px; margin-bottom: 24px;
+    }
+    .summary-card {
+      background: var(--bg2); border: 1px solid var(--border);
+      border-radius: var(--radius); padding: 16px 18px;
+    }
+    .summary-card .sc-label { font-size: 0.7rem; color: var(--text3); text-transform: uppercase; letter-spacing: 0.07em; margin-bottom: 6px; }
+    .summary-card .sc-val { font-size: 1.35rem; font-weight: 800; color: var(--orange); }
+    .summary-card .sc-sub { font-size: 0.72rem; color: var(--text3); margin-top: 3px; }
+
+    /* NOTA INFO */
+    .info-box {
+      background: rgba(78,154,241,0.06); border: 1px solid rgba(78,154,241,0.2);
+      border-radius: 10px; padding: 12px 16px; margin-bottom: 20px;
+      font-size: 0.78rem; color: var(--text2); line-height: 1.6;
+    }
+    .info-box strong { color: var(--text); }
+
+    /* SECTION TITLE */
+    .section-title {
+      display: flex; align-items: center; gap: 10px;
+      font-size: 0.72rem; font-weight: 700; color: var(--text3);
+      text-transform: uppercase; letter-spacing: 0.1em; margin-bottom: 14px;
+    }
+    .section-title::after { content:''; flex:1; height:1px; background:var(--border); }
+
+    /* FOOTER */
+    footer {
+      text-align: center; padding: 24px; color: var(--text3);
+      font-size: 0.78rem; border-top: 1px solid var(--border); margin-top: 20px;
+    }
+    footer a { color: var(--orange); text-decoration: none; }
+    footer strong { color: var(--text2); }
+
+    @media (max-width: 600px) {
+      header { padding: 12px 14px; }
+      main { padding: 16px 10px; }
+      .config-grid { grid-template-columns: 1fr 1fr; }
+    }
+  </style>
+</head>
+<body>
+
+<header>
+  <div class="logo">⛏</div>
+  <div>
+    <h1>¿Qué <span>Minero</span> Me Conviene?</h1>
+    <p>Compara equipos de minería Bitcoin asumiendo coste de luz 0 €</p>
+    <p class="author-line">
+      Por <strong style="color:var(--text2)">Marcos</strong> ·
+      <a href="https://www.youtube.com/@MarcosReviews" target="_blank" rel="noopener">▶ YouTube @MarcosReviews</a> ·
+      <a href="https://t.me/MarcosReviews" target="_blank" rel="noopener">✈ Telegram @MarcosReviews</a>
+    </p>
+  </div>
+  <a href="https://www.startminingnow.es" target="_blank" rel="noopener" class="header-btn cta">🛒 Ver tienda</a>
+  <button class="header-btn" onclick="toggleTheme()" id="themeBtn">☀️ <span id="themeLabel">Modo claro</span></button>
+</header>
+
+<main>
+
+  <!-- AVISO -->
+  <div class="info-box">
+    💡 Esta calculadora está pensada para quien <strong>no paga electricidad</strong> (energía gratuita, solar propia, acuerdo especial…). Con luz gratis, la única inversión es el equipo. La herramienta te muestra cuánto BTC genera cada minero y en cuántos meses recuperas lo invertido.
+  </div>
+
+  <!-- CONFIG -->
+  <p class="section-title">Configuración del mercado</p>
+  <div class="config-card">
+    <div class="config-grid">
+      <div class="field">
+        <label>Precio Bitcoin (€)</label>
+        <div class="input-wrap">
+          <input type="number" id="precioBTC" placeholder="Cargando…" min="0" step="100" oninput="recalcular()">
+          <span class="unit">€</span>
+        </div>
+        <div class="btc-status" id="btcStatus"></div>
+      </div>
+      <div class="field">
+        <label>Dificultad de red actual</label>
+        <div class="input-wrap">
+          <input type="number" id="dificultadRed" value="122" min="1" step="1" oninput="recalcular()">
+          <span class="unit">T (×10¹²)</span>
+        </div>
+        <div class="btc-status" id="diffStatus" style="color:var(--text3);font-size:0.7rem;margin-top:4px;"></div>
+      </div>
+      <div class="field">
+        <label>Crecimiento dificultad anual</label>
+        <div class="input-wrap">
+          <input type="number" id="difAnual" value="40" min="0" max="200" step="1" oninput="recalcular()">
+          <span class="unit">%/año</span>
+        </div>
+      </div>
+      <div class="field">
+        <label>Recompensa por bloque</label>
+        <div class="input-wrap">
+          <input type="number" id="blockReward" value="3.125" min="0.001" step="0.001" oninput="recalcular()">
+          <span class="unit">BTC</span>
+        </div>
+      </div>
+      <div class="field">
+        <label>Horizonte de análisis</label>
+        <div class="input-wrap">
+          <input type="number" id="horizonte" value="36" min="6" max="120" step="6" oninput="recalcular()">
+          <span class="unit">meses</span>
+        </div>
+      </div>
+      <div class="field">
+        <label>Precio objetivo BTC (€)</label>
+        <div class="input-wrap">
+          <input type="number" id="precioObjetivo" value="200000" min="0" step="10000" oninput="recalcular()">
+          <span class="unit">€</span>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- FILTRO + ORDEN -->
+  <div class="filter-bar">
+    <label>Presupuesto máx:</label>
+    <input type="range" id="budgetSlider" min="500" max="10000" step="100" value="10000" oninput="onBudgetSlide()">
+    <span class="filter-val" id="budgetVal">Sin límite</span>
+    <div class="sort-bar" style="margin-left:auto;">
+      <span style="font-size:0.72rem;color:var(--text3);margin-right:4px;">Ordenar:</span>
+      <button class="sort-btn active" id="sort_roi"     onclick="setSort('roi')">ROI</button>
+      <button class="sort-btn"        id="sort_btcYear" onclick="setSort('btcYear')">BTC/año</button>
+      <button class="sort-btn"        id="sort_price"   onclick="setSort('price')">Precio</button>
+      <button class="sort-btn"        id="sort_ths"     onclick="setSort('ths')">TH/s</button>
+    </div>
+  </div>
+
+  <!-- TABLA -->
+  <p class="section-title">Comparativa de equipos</p>
+  <div class="table-card">
+    <div class="table-scroll">
+      <table>
+        <thead>
+          <tr>
+            <th style="text-align:left;">Equipo</th>
+            <th>TH/s</th>
+            <th>W</th>
+            <th>J/TH</th>
+            <th>Precio (€) <span style="font-weight:400;text-transform:none;font-size:0.65rem;">editable</span></th>
+            <th>BTC/día</th>
+            <th>BTC/mes</th>
+            <th>BTC/año</th>
+            <th>€/mes (hoy)</th>
+            <th>€/mes (obj.)</th>
+            <th>ROI</th>
+            <th>ROI (precio obj.)</th>
+            <th></th>
+          </tr>
+        </thead>
+        <tbody id="minersTableBody"></tbody>
+      </table>
+    </div>
+  </div>
+
+  <p style="font-size:0.7rem;color:var(--text3);margin-top:10px;text-align:right;">
+    * Los precios son orientativos. Edítalos directamente en la tabla. ROI calculado con dificultad creciente mes a mes.
+  </p>
+
+</main>
+
+<footer>
+  Creado por <strong>Marcos</strong> ·
+  <a href="https://www.youtube.com/@MarcosReviews" target="_blank" rel="noopener">▶ Marcos Reviews</a> ·
+  <a href="https://t.me/MarcosReviews" target="_blank" rel="noopener">✈ Telegram @MarcosReviews</a>
+  <br style="margin-bottom:4px;">
+  Solo orientativo — valores de red y precio BTC cambian constantemente. ·
+  <a href="https://www.startminingnow.es" target="_blank" rel="noopener">🛒 StartMiningNow.es</a> ·
+  <a href="https://miningnow.com/" target="_blank" rel="noopener">MiningNow.com</a>
+</footer>
+
+<script>
+  // ── BASE DE DATOS DE MINEROS ──────────────────────────────────────────
+  const MINERS = [
+    { id:'S19j_Pro',  name:'Antminer S19j Pro',  brand:'Bitmain', ths:104,  watts:3068, price:650  },
+    { id:'S19_XP',    name:'Antminer S19 XP',    brand:'Bitmain', ths:140,  watts:3010, price:900  },
+    { id:'S21',       name:'Antminer S21',        brand:'Bitmain', ths:200,  watts:3500, price:1400 },
+    { id:'S21_Plus',  name:'Antminer S21+',       brand:'Bitmain', ths:216,  watts:3600, price:1700 },
+    { id:'S21_Pro',   name:'Antminer S21 Pro',    brand:'Bitmain', ths:234,  watts:3510, price:2100 },
+    { id:'S21_XP',    name:'Antminer S21 XP',     brand:'Bitmain', ths:270,  watts:3640, price:2700 },
+    { id:'S21_XP_Hyd',name:'Antminer S21 XP Hyd',brand:'Bitmain', ths:305,  watts:5360, price:4000 },
+    { id:'M50S',      name:'Whatsminer M50S',     brand:'MicroBT', ths:126,  watts:3276, price:800  },
+    { id:'M60S',      name:'Whatsminer M60S',     brand:'MicroBT', ths:186,  watts:3441, price:1300 },
+    { id:'M63S',      name:'Whatsminer M63S',     brand:'MicroBT', ths:390,  watts:7215, price:3200 },
+    { id:'M66S',      name:'Whatsminer M66S',     brand:'MicroBT', ths:298,  watts:5555, price:2800 },
+  ];
+
+  // Precios editables (copia mutable)
+  const minerPrices = {};
+  MINERS.forEach(m => minerPrices[m.id] = m.price);
+
+  // ── ESTADO ────────────────────────────────────────────────────────────
+  let sortKey    = 'roi';
+  let budgetMax  = 10000;
+
+  // ── HELPERS ───────────────────────────────────────────────────────────
+  const $ = id => document.getElementById(id);
+  const fmt = (n, dec=2) => isFinite(n) ? n.toLocaleString('es-ES', {minimumFractionDigits:dec, maximumFractionDigits:dec}) : '—';
+  const fmtBTC = n => isFinite(n) ? n.toFixed(8) : '—';
+  const val = id => { const v = parseFloat($(id)?.value); return isNaN(v) ? 0 : v; };
+
+  // ── FÓRMULA BTC/DÍA ──────────────────────────────────────────────────
+  // BTC/día = (hashrate_TH * 1e12) / (difficulty * 2^32) * 144 * blockReward
+  function btcPerDay(hashrateTH, difficulty, blockReward) {
+    return (hashrateTH * 1e12) / (difficulty * Math.pow(2, 32)) * 144 * blockReward;
+  }
+
+  // ── ROI CON DIFICULTAD CRECIENTE ─────────────────────────────────────
+  function calcROI(precio, hashrateTH, btcPriceEur, difficulty, diffGrowthAnnual, blockReward, horizonte) {
+    if (precio <= 0 || btcPriceEur <= 0) return { meses: Infinity, btcAcum: 0, eurAcum: 0 };
+    const factorMens = Math.pow(1 + diffGrowthAnnual / 100, 1 / 12);
+    let acumEur  = 0;
+    let acumBTC  = 0;
+    let diffAct  = difficulty;
+    let roiMeses = Infinity;
+
+    for (let i = 1; i <= horizonte; i++) {
+      const btcDia = btcPerDay(hashrateTH, diffAct, blockReward);
+      const ingMes = btcDia * 30 * btcPriceEur;
+      const btcMes = btcDia * 30;
+      acumEur += ingMes;
+      acumBTC += btcMes;
+      diffAct *= factorMens;
+      if (roiMeses === Infinity && acumEur >= precio) roiMeses = i;
+    }
+    return { meses: roiMeses, btcAcum: acumBTC, eurAcum: acumEur };
+  }
+
+  // ── CALCULAR + RENDERIZAR ─────────────────────────────────────────────
+  function recalcular() {
+    const btcPrice     = val('precioBTC');
+    const btcObj       = val('precioObjetivo');
+    const diffT        = val('dificultadRed');       // en T (×10¹²)
+    const diffVal      = diffT * 1e12;
+    const difAnual     = val('difAnual');
+    const blockReward  = val('blockReward');
+    const horizonte    = Math.max(6, Math.round(val('horizonte')));
+
+    if (btcPrice <= 0 || diffVal <= 0) return;
+
+    // Calcular stats para cada minero
+    const rows = MINERS.map(m => {
+      const price   = minerPrices[m.id];
+      const btcDia  = btcPerDay(m.ths, diffVal, blockReward);
+      const btcMes  = btcDia * 30;
+      const btcYear = btcDia * 365;
+      const eurMes  = btcMes * btcPrice;
+      const eurMesObj = btcMes * btcObj;
+
+      const roi     = calcROI(price, m.ths, btcPrice,  diffVal, difAnual, blockReward, horizonte);
+      const roiObj  = calcROI(price, m.ths, btcObj,    diffVal, difAnual, blockReward, horizonte);
+
+      return { ...m, price, btcDia, btcMes, btcYear, eurMes, eurMesObj,
+               roi: roi.meses, roiObj: roiObj.meses,
+               btcAcum: roi.btcAcum, eurAcum: roi.eurAcum };
+    });
+
+    // Filtrar por presupuesto
+    const filtered = rows.filter(r => r.price <= budgetMax);
+
+    // Ordenar
+    const sorted = [...filtered].sort((a, b) => {
+      if (sortKey === 'roi')     return (a.roi     === Infinity ? 9999 : a.roi)     - (b.roi     === Infinity ? 9999 : b.roi);
+      if (sortKey === 'btcYear') return b.btcYear - a.btcYear;
+      if (sortKey === 'price')   return a.price   - b.price;
+      if (sortKey === 'ths')     return b.ths      - a.ths;
+      return 0;
+    });
+
+    // Renderizar
+    $('minersTableBody').innerHTML = sorted.map(r => {
+      const roiBadge = roi => {
+        if (!isFinite(roi)) return `<span class="roi-badge roi-never">No recupera</span>`;
+        if (roi <= 18) return `<span class="roi-badge roi-fast">${roi} meses</span>`;
+        if (roi <= 36) return `<span class="roi-badge roi-mid">${roi} meses</span>`;
+        return `<span class="roi-badge roi-slow">${roi} meses</span>`;
+      };
+      const eff = (r.watts / r.ths).toFixed(1);
+      return `<tr>
+        <td>
+          <span class="miner-name">${r.name}</span>
+          <span class="miner-brand">${r.brand}</span>
+        </td>
+        <td class="orange">${r.ths}</td>
+        <td class="muted">${r.watts.toLocaleString('es-ES')}</td>
+        <td class="muted">${eff}</td>
+        <td>
+          <input class="price-input" type="number" value="${r.price}" min="1" step="50"
+            onchange="minerPrices['${r.id}'] = parseFloat(this.value)||0; recalcular();">
+        </td>
+        <td class="muted">${fmtBTC(r.btcDia)}</td>
+        <td>${fmtBTC(r.btcMes)}</td>
+        <td class="orange">${r.btcYear.toFixed(6)}</td>
+        <td class="${r.eurMes >= 0 ? 'pos' : 'neg'}">${fmt(r.eurMes)} €</td>
+        <td style="color:var(--blue);font-weight:700;">${fmt(r.eurMesObj)} €</td>
+        <td>${roiBadge(r.roi)}</td>
+        <td>${roiBadge(r.roiObj)}</td>
+        <td>
+          <a class="btn-buy" href="https://www.startminingnow.es" target="_blank" rel="noopener">🛒 Comprar</a>
+        </td>
+      </tr>`;
+    }).join('');
+
+    if (sorted.length === 0) {
+      $('minersTableBody').innerHTML = `<tr><td colspan="13" style="text-align:center;padding:24px;color:var(--text3);">No hay equipos en este rango de presupuesto.</td></tr>`;
+    }
+  }
+
+  // ── SORT ─────────────────────────────────────────────────────────────
+  function setSort(key) {
+    sortKey = key;
+    ['roi','btcYear','price','ths'].forEach(k => {
+      $(`sort_${k}`)?.classList.toggle('active', k === key);
+    });
+    recalcular();
+  }
+
+  // ── PRESUPUESTO ───────────────────────────────────────────────────────
+  function onBudgetSlide() {
+    const v = parseInt($('budgetSlider').value);
+    budgetMax = v;
+    $('budgetVal').textContent = v >= 10000 ? 'Sin límite' : v.toLocaleString('es-ES') + ' €';
+    recalcular();
+  }
+
+  // ── TEMA ─────────────────────────────────────────────────────────────
+  function toggleTheme() {
+    const isLight = document.documentElement.classList.toggle('light');
+    $('themeBtn').innerHTML = isLight ? '🌙 <span>Modo oscuro</span>' : '☀️ <span>Modo claro</span>';
+  }
+
+  // ── FETCH BTC PRICE ───────────────────────────────────────────────────
+  async function fetchBTCPrice() {
+    $('btcStatus').style.color = 'var(--text3)';
+    $('btcStatus').textContent = 'Obteniendo precio…';
+    try {
+      const r = await fetch('https://api.coingecko.com/api/v3/simple/price?ids=bitcoin&vs_currencies=eur');
+      const d = await r.json();
+      const price = d.bitcoin.eur;
+      $('precioBTC').value = price;
+      $('btcStatus').style.color = 'var(--green)';
+      $('btcStatus').textContent = `✓ Actualizado — ${price.toLocaleString('es-ES')} €`;
+      recalcular();
+    } catch {
+      $('btcStatus').style.color = 'var(--red)';
+      $('btcStatus').textContent = '⚠ Sin conexión — introduce el precio manualmente';
+    }
+  }
+
+  // ── FETCH NETWORK DIFFICULTY ──────────────────────────────────────────
+  async function fetchDifficulty() {
+    $('diffStatus').textContent = 'Obteniendo dificultad…';
+    try {
+      const r = await fetch('https://mempool.space/api/v1/difficulty-adjustment');
+      const d = await r.json();
+      if (d.currentDifficulty) {
+        const diffT = (d.currentDifficulty / 1e12).toFixed(1);
+        $('dificultadRed').value = diffT;
+        $('diffStatus').style.color = 'var(--green)';
+        $('diffStatus').textContent = `✓ Dificultad actual: ${diffT} T`;
+        recalcular();
+      }
+    } catch {
+      $('diffStatus').style.color = 'var(--text3)';
+      $('diffStatus').textContent = 'Valor estimado — actualiza si lo conoces';
+    }
+  }
+
+  // ── INIT ─────────────────────────────────────────────────────────────
+  window.addEventListener('DOMContentLoaded', () => {
+    recalcular();
+    fetchBTCPrice();
+    fetchDifficulty();
+  });
+</script>
+</body>
+</html>
