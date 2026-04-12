@@ -351,7 +351,8 @@
   // ── FÓRMULA BTC/DÍA ──────────────────────────────────────────────────
   // BTC/día = (hashrate_TH * 1e12) / (difficulty * 2^32) * 144 * blockReward
   function btcPerDay(hashrateTH, difficulty, blockReward) {
-    return (hashrateTH * 1e12) / (difficulty * Math.pow(2, 32)) * 144 * blockReward;
+    // hashrate (H/s) * segundos/día / (difficulty * 2^32) * recompensa por bloque
+    return (hashrateTH * 1e12 * 86400) / (difficulty * Math.pow(2, 32)) * blockReward;
   }
 
   // ── ROI CON DIFICULTAD CRECIENTE ─────────────────────────────────────
