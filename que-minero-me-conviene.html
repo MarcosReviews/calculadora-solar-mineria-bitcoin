@@ -41,6 +41,7 @@
     }
     .header-btn:hover { border-color: var(--orange); }
     .header-btn.cta { background: var(--orange); color: #000; border-color: var(--orange); font-weight: 800; }
+    .header-btn.active-currency { border-color: var(--orange); color: var(--orange); }
 
     /* MAIN */
     main { max-width: 1200px; margin: 0 auto; padding: 24px 16px; }
@@ -199,6 +200,10 @@
       <a href="https://t.me/MarcosReviews" target="_blank" rel="noopener">✈ Telegram @MarcosReviews</a>
     </p>
   </div>
+  <div style="display:flex;gap:4px;">
+    <button class="header-btn active-currency" id="btn_eur" onclick="setCurrency('eur')" style="font-weight:800;">€ EUR</button>
+    <button class="header-btn" id="btn_usd" onclick="setCurrency('usd')" style="font-weight:800;">$ USD</button>
+  </div>
   <a href="https://www.startminingnow.es" target="_blank" rel="noopener" class="header-btn cta">🛒 Ver tienda</a>
   <button class="header-btn" onclick="toggleTheme()" id="themeBtn">☀️ <span id="themeLabel">Modo claro</span></button>
 </header>
@@ -215,10 +220,10 @@
   <div class="config-card">
     <div class="config-grid">
       <div class="field">
-        <label>Precio Bitcoin (€)</label>
+        <label id="lbl_precioBTC">Precio Bitcoin (€)</label>
         <div class="input-wrap">
           <input type="number" id="precioBTC" placeholder="Cargando…" min="0" step="100" oninput="recalcular()">
-          <span class="unit">€</span>
+          <span class="unit" id="unit_precioBTC">€</span>
         </div>
         <div class="btc-status" id="btcStatus"></div>
       </div>
@@ -252,10 +257,10 @@
         </div>
       </div>
       <div class="field">
-        <label>Precio objetivo BTC (€)</label>
+        <label id="lbl_precioObj">Precio objetivo BTC (€)</label>
         <div class="input-wrap">
           <input type="number" id="precioObjetivo" value="200000" min="0" step="10000" oninput="recalcular()">
-          <span class="unit">€</span>
+          <span class="unit" id="unit_precioObj">€</span>
         </div>
       </div>
     </div>
@@ -290,8 +295,8 @@
             <th>BTC/día</th>
             <th>BTC/mes</th>
             <th>BTC/año</th>
-            <th>€/mes (hoy)</th>
-            <th>€/mes (obj.)</th>
+            <th id="th_eurMes">€/mes (hoy)</th>
+            <th id="th_eurMesObj">€/mes (obj.)</th>
             <th>ROI</th>
             <th>ROI (precio obj.)</th>
             <th></th>
@@ -341,12 +346,14 @@
   // ── ESTADO ────────────────────────────────────────────────────────────
   let sortKey    = 'roi';
   let budgetMax  = 10000;
+  let currency   = 'eur';  // 'eur' | 'usd'
 
   // ── HELPERS ───────────────────────────────────────────────────────────
   const $ = id => document.getElementById(id);
   const fmt = (n, dec=2) => isFinite(n) ? n.toLocaleString('es-ES', {minimumFractionDigits:dec, maximumFractionDigits:dec}) : '—';
   const fmtBTC = n => isFinite(n) ? n.toFixed(8) : '—';
   const val = id => { const v = parseFloat($(id)?.value); return isNaN(v) ? 0 : v; };
+  const sym = () => currency === 'usd' ? '$' : '€';
 
   // ── FÓRMULA BTC/DÍA ──────────────────────────────────────────────────
   // BTC/día = (hashrate_TH * 1e12) / (difficulty * 2^32) * 144 * blockReward
@@ -441,8 +448,8 @@
         <td class="muted">${fmtBTC(r.btcDia)}</td>
         <td>${fmtBTC(r.btcMes)}</td>
         <td class="orange">${r.btcYear.toFixed(6)}</td>
-        <td class="${r.eurMes >= 0 ? 'pos' : 'neg'}">${fmt(r.eurMes)} €</td>
-        <td style="color:var(--blue);font-weight:700;">${fmt(r.eurMesObj)} €</td>
+        <td class="${r.eurMes >= 0 ? 'pos' : 'neg'}">${fmt(r.eurMes)} ${sym()}</td>
+        <td style="color:var(--blue);font-weight:700;">${fmt(r.eurMesObj)} ${sym()}</td>
         <td>${roiBadge(r.roi)}</td>
         <td>${roiBadge(r.roiObj)}</td>
         <td>
@@ -473,6 +480,27 @@
     recalcular();
   }
 
+  // ── MONEDA ───────────────────────────────────────────────────────────
+  function setCurrency(c) {
+    currency = c;
+    $('btn_eur').classList.toggle('active-currency', c === 'eur');
+    $('btn_usd').classList.toggle('active-currency', c === 'usd');
+    const s = sym();
+    // Actualizar etiquetas y unidades
+    $('lbl_precioBTC').textContent   = `Precio Bitcoin (${s})`;
+    $('unit_precioBTC').textContent  = s;
+    $('lbl_precioObj').textContent   = `Precio objetivo BTC (${s})`;
+    $('unit_precioObj').textContent  = s;
+    $('th_eurMes').textContent       = `${s}/mes (hoy)`;
+    $('th_eurMesObj').textContent    = `${s}/mes (obj.)`;
+    // Ajustar precio objetivo por defecto al cambiar moneda
+    const objActual = val('precioObjetivo');
+    if (c === 'usd' && objActual === 200000) $('precioObjetivo').value = 230000;
+    if (c === 'eur' && objActual === 230000) $('precioObjetivo').value = 200000;
+    // Re-fetch precio BTC en la nueva moneda
+    fetchBTCPrice();
+  }
+
   // ── TEMA ─────────────────────────────────────────────────────────────
   function toggleTheme() {
     const isLight = document.documentElement.classList.toggle('light');
@@ -484,12 +512,13 @@
     $('btcStatus').style.color = 'var(--text3)';
     $('btcStatus').textContent = 'Obteniendo precio…';
     try {
-      const r = await fetch('https://api.coingecko.com/api/v3/simple/price?ids=bitcoin&vs_currencies=eur');
+      const cur = currency;
+      const r = await fetch(`https://api.coingecko.com/api/v3/simple/price?ids=bitcoin&vs_currencies=${cur}`);
       const d = await r.json();
-      const price = d.bitcoin.eur;
+      const price = d.bitcoin[cur];
       $('precioBTC').value = price;
       $('btcStatus').style.color = 'var(--green)';
-      $('btcStatus').textContent = `✓ Actualizado — ${price.toLocaleString('es-ES')} €`;
+      $('btcStatus').textContent = `✓ Actualizado — ${price.toLocaleString('es-ES')} ${sym()}`;
       recalcular();
     } catch {
       $('btcStatus').style.color = 'var(--red)';
